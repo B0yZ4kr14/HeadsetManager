@@ -1,80 +1,97 @@
-import Layout from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, Mic, Volume2, Usb, CheckCircle2, AlertCircle, RefreshCw, Headphones, Play, Square, Settings2, Info, Download, Waves } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { Mic, Play, Square, Download, Activity, Volume2, RefreshCw, Info, AlertCircle } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+interface AudioDevice {
+  deviceId: string;
+  label: string;
+  kind: string;
+  groupId: string;
+}
 
 export default function Home() {
-  const [isScanning, setIsScanning] = useState(false);
+  const [devices, setDevices] = useState<AudioDevice[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isNoiseTestRunning, setIsNoiseTestRunning] = useState(false);
-  const [selectedMic, setSelectedMic] = useState<string>("");
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isNoiseTestActive, setIsNoiseTestActive] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const noiseOscillatorRef = useRef<OscillatorNode | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const noiseSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  // Carregar lista real de dispositivos
-  useEffect(() => {
-    const getDevices = async () => {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true }); // Solicita permissão
-        const devs = await navigator.mediaDevices.enumerateDevices();
-        const audioInputs = devs.filter(d => d.kind === 'audioinput');
-        setDevices(audioInputs);
-        if (audioInputs.length > 0) {
-          setSelectedMic(audioInputs[0].deviceId);
-        }
-      } catch (err) {
-        console.error("Erro ao listar dispositivos:", err);
-        toast.error("Permissão de microfone negada");
-      }
-    };
-    getDevices();
+  const stopVisualization = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
   }, []);
 
-  // Inicializa o contexto de áudio e analisador
-  const initAudio = async (deviceId: string) => {
-    try {
+  const stopNoiseTest = useCallback(() => {
+    if (noiseSourceRef.current) {
+      try {
+        noiseSourceRef.current.stop();
+      } catch (e) {
+        // Ignore errors if already stopped
+      }
+      noiseSourceRef.current = null;
+    }
+    setIsNoiseTestActive(false);
+    if (isRecording) {
+      stopRecording();
+    }
+    toast.info("Teste de ruído parado");
+  }, [isRecording]);
+
+  useEffect(() => {
+    getDevices();
+    return () => {
+      stopVisualization();
+      stopNoiseTest();
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
+    };
+  }, [stopVisualization, stopNoiseTest]);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { deviceId: { exact: deviceId } } 
-      });
+  const getDevices = async () => {
+    try {
+      // Request permission to list labels
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // Stop immediately, just needed permission
+      setPermissionDenied(false);
+
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = allDevices.filter(device => device.kind === 'audioinput');
+      setDevices(audioInputs);
       
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const audioContext = audioContextRef.current;
-      
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      analyserRef.current = analyser;
-
-      const source = audioContext.createMediaStreamSource(stream);
-      source.connect(analyser);
-
-      drawSpectrum();
-    } catch (err) {
-      console.error("Erro ao acessar microfone:", err);
+      if (audioInputs.length > 0 && !selectedDeviceId) {
+        // Prefer USB devices if identifiable, otherwise first one
+        const usbDevice = audioInputs.find(d => d.label.toLowerCase().includes('usb'));
+        setSelectedDeviceId(usbDevice ? usbDevice.deviceId : audioInputs[0].deviceId);
+      }
+      toast.success("Dispositivos escaneados com sucesso");
+    } catch (error) {
+      console.error("Error accessing media devices:", error);
+      setPermissionDenied(true);
+      toast.error("Erro ao acessar dispositivos. Verifique permissões do navegador.");
     }
   };
-
-  // Atualiza o áudio quando o dispositivo muda
-  useEffect(() => {
-    if (selectedMic) {
-      initAudio(selectedMic);
-    }
-  }, [selectedMic]);
 
   const drawSpectrum = () => {
     const canvas = canvasRef.current;
@@ -88,367 +105,376 @@ export default function Home() {
     const dataArray = new Uint8Array(bufferLength);
 
     const draw = () => {
-      animationRef.current = requestAnimationFrame(draw);
+      animationFrameRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      const width = canvas.width;
-      const height = canvas.height;
-      ctx.clearRect(0, 0, width, height);
+      // Use CSS variables for colors if possible, or fallback to theme colors
+      ctx.fillStyle = 'rgb(255, 255, 255)'; 
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const barWidth = (width / bufferLength) * 2.5;
+      const barWidth = (canvas.width / bufferLength) * 2.5;
       let barHeight;
       let x = 0;
 
       for (let i = 0; i < bufferLength; i++) {
         barHeight = dataArray[i] / 2;
-        ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
-        ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+        
+        // Professional gradient: Blue to Cyan
+        const r = 50;
+        const g = 100 + (i / bufferLength) * 155;
+        const b = 255;
+
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
         x += barWidth + 1;
       }
     };
+
     draw();
   };
 
+  const startVisualization = async (stream: MediaStream) => {
+    if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    
+    const audioContext = audioContextRef.current;
+    
+    // Resume context if suspended (browser policy)
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+
+    const source = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.8;
+    source.connect(analyser);
+    analyserRef.current = analyser;
+
+    drawSpectrum();
+  };
+
   const startRecording = async () => {
+    if (!selectedDeviceId) {
+      toast.error("Selecione um dispositivo primeiro");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { deviceId: { exact: selectedMic } } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { 
+          deviceId: { exact: selectedDeviceId },
+          echoCancellation: false, // Disable processing for raw test
+          noiseSuppression: false,
+          autoGainControl: false
+        }
       });
+      
+      streamRef.current = stream;
+      startVisualization(stream);
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      const chunks: BlobPart[] = [];
+      audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "audio/mp3" });
-        setAudioBlob(blob);
-        setIsRecording(false);
-        toast.success("Gravação concluída");
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(audioBlob);
+        const url = URL.createObjectURL(audioBlob);
+        setAudioUrl(url);
+        stopVisualization();
+        
+        // Stop all tracks to release microphone
+        stream.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       };
 
       mediaRecorder.start();
       setIsRecording(true);
-      toast.info("Gravando...");
-    } catch (err) {
-      toast.error("Erro ao gravar");
+      toast.info("Gravação iniciada...");
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast.error("Erro ao iniciar gravação. Verifique se o microfone está em uso.");
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      toast.success("Gravação finalizada.");
     }
   };
 
-  const playRecording = () => {
-    if (audioBlob) {
-      const audioUrl = URL.createObjectURL(audioBlob);
+  const playAudio = () => {
+    if (audioUrl) {
       const audio = new Audio(audioUrl);
-      setIsPlaying(true);
-      audio.play();
+      audio.onplay = () => setIsPlaying(true);
       audio.onended = () => setIsPlaying(false);
+      audio.onerror = () => {
+        setIsPlaying(false);
+        toast.error("Erro ao reproduzir áudio.");
+      };
+      audio.play();
     }
   };
 
-  const downloadRecording = () => {
-    if (audioBlob) {
-      const url = URL.createObjectURL(audioBlob);
-      const a = document.createElement("a");
+  const downloadAudio = () => {
+    if (audioUrl) {
+      const a = document.createElement('a');
+      a.href = audioUrl;
+      a.download = `headset_test_${new Date().toISOString().slice(0,19).replace(/:/g,"-")}.webm`;
       document.body.appendChild(a);
-      a.style.display = "none";
-      a.href = url;
-      a.download = "teste_microfone.mp3";
       a.click();
-      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("Download iniciado");
     }
   };
 
-  // Teste de Cancelamento de Ruído (Pink Noise)
-  const toggleNoiseTest = async () => {
-    if (isNoiseTestRunning) {
-      // Parar ruído
-      if (noiseOscillatorRef.current) {
-        noiseOscillatorRef.current.stop();
-        noiseOscillatorRef.current.disconnect();
-        noiseOscillatorRef.current = null;
-      }
-      setIsNoiseTestRunning(false);
-      stopRecording();
-      toast.info("Teste de ruído finalizado");
+  const toggleNoiseTest = () => {
+    if (isNoiseTestActive) {
+      stopNoiseTest();
     } else {
-      // Iniciar ruído e gravação
-      try {
-        if (!audioContextRef.current) return;
-        const ctx = audioContextRef.current;
-        
-        // Criar ruído branco (simulado)
-        const bufferSize = 2 * ctx.sampleRate;
-        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-
-        const whiteNoise = ctx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        whiteNoise.loop = true;
-        whiteNoise.connect(ctx.destination);
-        whiteNoise.start();
-        
-        // Armazenar referência para parar depois (usando any para simplificar o exemplo do buffer source)
-        (noiseOscillatorRef as any).current = whiteNoise; 
-
-        setIsNoiseTestRunning(true);
-        startRecording(); // Começa a gravar junto com o ruído
-        
-        toast.warning("Gerando ruído de fundo...", {
-          description: "O microfone deve filtrar este som se o cancelamento estiver ativo.",
-        });
-      } catch (err) {
-        console.error(err);
-        toast.error("Erro ao gerar ruído");
-      }
+      startNoiseTest();
     }
+  };
+
+  const startNoiseTest = async () => {
+    if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    const ctx = audioContextRef.current;
+    
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+
+    const bufferSize = ctx.sampleRate * 2; // 2 seconds buffer
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    // Generate White Noise
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const noiseSource = ctx.createBufferSource();
+    noiseSource.buffer = buffer;
+    noiseSource.loop = true;
+    
+    // Gain node to control volume
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = 0.5; // 50% volume to be safe
+    
+    noiseSource.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    noiseSource.start();
+    noiseSourceRef.current = noiseSource;
+    
+    setIsNoiseTestActive(true);
+    toast.warning("Teste de ruído ativo (White Noise)");
+    
+    // Auto-start recording for convenience
+    startRecording();
   };
 
   return (
-    <Layout>
-      <div className="space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border pb-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground mt-1">Visão geral do sistema de áudio e dispositivos conectados.</p>
-          </div>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <RefreshCw className="mr-2 h-4 w-4" /> Escanear Dispositivos
-          </Button>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">Visão geral do sistema de áudio e dispositivos conectados.</p>
         </div>
-
-        {/* Status Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Status do Serviço</CardTitle>
-              <Activity className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Ativo</div>
-              <p className="text-xs text-muted-foreground mt-1">PipeWire rodando</p>
-            </CardContent>
-          </Card>
-          <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Dispositivos USB</CardTitle>
-              <Usb className="h-4 w-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{devices.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">Entradas detectadas</p>
-            </CardContent>
-          </Card>
-          <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Entrada (Mic)</CardTitle>
-              <Mic className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold truncate text-ellipsis overflow-hidden whitespace-nowrap max-w-[150px]">
-                {devices.find(d => d.deviceId === selectedMic)?.label || "Selecione..."}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Ativo</p>
-            </CardContent>
-          </Card>
-          <Card className="swiss-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Saída (Audio)</CardTitle>
-              <Volume2 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Padrão</div>
-              <p className="text-xs text-muted-foreground mt-1">Volume: 60%</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-7">
-          {/* Device List & Audio Visualizer */}
-          <div className="col-span-4 space-y-4">
-            <Card className="swiss-card">
-              <CardHeader>
-                <CardTitle>Monitoramento de Áudio</CardTitle>
-                <CardDescription>Visualização em tempo real da entrada do microfone.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Dispositivo de Entrada</label>
-                    <Select value={selectedMic} onValueChange={setSelectedMic}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o microfone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {devices.map((device) => (
-                          <SelectItem key={device.deviceId} value={device.deviceId}>
-                            {device.label || `Microfone ${device.deviceId.slice(0, 5)}...`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="flex gap-2 flex-wrap">
-                    {!isRecording ? (
-                      <Button 
-                        variant="outline"
-                        onClick={startRecording}
-                        disabled={isPlaying || isNoiseTestRunning}
-                        className="flex-1"
-                      >
-                        <Mic className="mr-2 h-4 w-4" /> Gravar
-                      </Button>
-                    ) : (
-                      <Button 
-                        variant="destructive"
-                        onClick={isNoiseTestRunning ? toggleNoiseTest : stopRecording}
-                        className="flex-1"
-                      >
-                        <Square className="mr-2 h-4 w-4 animate-pulse" /> Parar
-                      </Button>
-                    )}
-
-                    <Button
-                      variant={isNoiseTestRunning ? "destructive" : "secondary"}
-                      onClick={toggleNoiseTest}
-                      disabled={isRecording && !isNoiseTestRunning}
-                      className="flex-1"
-                    >
-                      <Waves className="mr-2 h-4 w-4" /> 
-                      {isNoiseTestRunning ? "Parar Teste Ruído" : "Testar Cancel. Ruído"}
-                    </Button>
-                    
-                    {audioBlob && (
-                      <>
-                        <Button 
-                          variant="secondary"
-                          onClick={playRecording}
-                          disabled={isRecording || isPlaying}
-                        >
-                          {isPlaying ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
-                        </Button>
-                        <Button 
-                          variant="ghost"
-                          onClick={downloadRecording}
-                          disabled={isRecording}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-secondary/30 rounded-md p-4 border border-border">
-                  <canvas 
-                    ref={canvasRef} 
-                    width={600} 
-                    height={100} 
-                    className="w-full h-[100px]"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="swiss-card">
-              <CardHeader>
-                <CardTitle>Dispositivos Gerenciados</CardTitle>
-                <CardDescription>Lista de headsets configurados e ativos no momento.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Device 1 */}
-                  <div className="border border-border bg-secondary/20 rounded-lg overflow-hidden">
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 bg-primary/10 flex items-center justify-center text-primary rounded-md">
-                          <Headphones size={20} />
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm">Fanvil HT301-U</p>
-                          <p className="text-xs text-muted-foreground font-mono">ID: 2849:3011</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                          <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo
-                        </Badge>
-                        <Button variant="ghost" size="sm">Configurar</Button>
-                      </div>
-                    </div>
-                    
-                    {/* Detalhes Técnicos Expandidos */}
-                    <div className="bg-background/50 p-4 border-t border-border grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Fabricante</span>
-                        <span className="font-medium">Fanvil Technology Co., Ltd.</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Driver</span>
-                        <span className="font-medium">snd-usb-audio (ALSA)</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Codecs Suportados</span>
-                        <div className="flex gap-1 mt-1">
-                          <Badge variant="secondary" className="text-[10px] h-5">PCM</Badge>
-                          <Badge variant="secondary" className="text-[10px] h-5">S16_LE</Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Taxa de Amostragem</span>
-                        <span className="font-medium">44.1kHz / 48kHz</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Logs */}
-          <Card className="col-span-3 swiss-card bg-[#0A0A0A] border-none text-gray-300 font-mono text-sm h-full min-h-[500px] flex flex-col">
-            <CardHeader>
-              <CardTitle className="text-white">Terminal Log</CardTitle>
-              <CardDescription className="text-gray-400">Últimas atividades do daemon.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <div className="flex-1 overflow-y-auto space-y-2 text-gray-300 custom-scrollbar">
-                <div className="flex gap-2">
-                  <span className="text-blue-400">[14:20:01]</span>
-                  <span>INFO: Scanning USB bus...</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-blue-400">[14:20:02]</span>
-                  <span>INFO: Found device Fanvil HT301-U</span>
-                </div>
-                {isRecording && (
-                   <div className="flex gap-2 animate-pulse">
-                   <span className="text-yellow-400">[{new Date().toLocaleTimeString()}]</span>
-                   <span>INFO: Recording audio sample...</span>
-                 </div>
-                )}
-                {isNoiseTestRunning && (
-                   <div className="flex gap-2 animate-pulse">
-                   <span className="text-red-400">[{new Date().toLocaleTimeString()}]</span>
-                   <span>WARN: Generating background noise...</span>
-                 </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Button onClick={getDevices} variant="outline">
+          <RefreshCw className="mr-2 h-4 w-4" />
+          Escanear Dispositivos
+        </Button>
       </div>
-    </Layout>
+
+      {permissionDenied && (
+        <div className="bg-destructive/15 text-destructive p-4 rounded-md flex items-center gap-2 border border-destructive/20">
+          <AlertCircle className="h-5 w-5" />
+          <span>Permissão de microfone negada. Por favor, permita o acesso no navegador para usar os recursos de teste.</span>
+        </div>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Status do Serviço</CardTitle>
+            <Activity className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Ativo</div>
+            <p className="text-xs text-muted-foreground">Web Audio API Ready</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Dispositivos USB</CardTitle>
+            <div className="h-4 w-4 text-blue-500">⚡</div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{devices.length}</div>
+            <p className="text-xs text-muted-foreground">Entradas detectadas</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Entrada (Mic)</CardTitle>
+            <Mic className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold truncate" title={devices.find(d => d.deviceId === selectedDeviceId)?.label}>
+              {devices.find(d => d.deviceId === selectedDeviceId)?.label.substring(0, 15) || "Selecione..."}
+            </div>
+            <p className="text-xs text-muted-foreground">Ativo</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Saída (Audio)</CardTitle>
+            <Volume2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Padrão</div>
+            <p className="text-xs text-muted-foreground">Sistema</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle>Monitoramento de Áudio</CardTitle>
+            <p className="text-sm text-muted-foreground">Visualização em tempo real da entrada do microfone.</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Dispositivo de Entrada</label>
+              <Select value={selectedDeviceId} onValueChange={setSelectedDeviceId} disabled={isRecording}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o microfone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {devices.map((device) => (
+                    <SelectItem key={device.deviceId} value={device.deviceId}>
+                      {device.label || `Microfone ${device.deviceId.substring(0, 5)}...`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex space-x-2">
+              {!isRecording ? (
+                <Button onClick={startRecording} className="w-full" variant={isNoiseTestActive ? "secondary" : "default"} disabled={!selectedDeviceId}>
+                  <Mic className="mr-2 h-4 w-4" />
+                  {isNoiseTestActive ? "Gravando Teste..." : "Gravar"}
+                </Button>
+              ) : (
+                <Button onClick={stopRecording} variant="destructive" className="w-full animate-pulse">
+                  <Square className="mr-2 h-4 w-4" />
+                  Parar
+                </Button>
+              )}
+              
+              <Button 
+                onClick={toggleNoiseTest} 
+                variant={isNoiseTestActive ? "destructive" : "secondary"}
+                className="w-full"
+                disabled={isRecording && !isNoiseTestActive} // Disable starting noise test while recording normal audio
+              >
+                <Activity className="mr-2 h-4 w-4" />
+                {isNoiseTestActive ? "Parar Teste Ruído" : "Testar Cancel. Ruído"}
+              </Button>
+            </div>
+
+            <div className="h-48 bg-muted rounded-md border flex items-center justify-center overflow-hidden relative">
+               <canvas ref={canvasRef} width="600" height="200" className="w-full h-full" />
+               {!isRecording && !isNoiseTestActive && (
+                 <div className="absolute text-muted-foreground text-sm flex flex-col items-center gap-2">
+                   <Activity className="h-8 w-8 opacity-50" />
+                   <span>Inicie a gravação para ver o espectro</span>
+                 </div>
+               )}
+            </div>
+
+            {audioUrl && (
+              <div className="flex items-center space-x-2 p-4 bg-secondary/20 rounded-md border animate-in fade-in slide-in-from-top-2">
+                <Button size="icon" variant="ghost" onClick={playAudio} disabled={isPlaying}>
+                  {isPlaying ? <Activity className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+                </Button>
+                <div className="flex-1 text-sm font-medium">
+                  Gravação disponível
+                </div>
+                <Button size="icon" variant="ghost" onClick={downloadAudio}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Detalhes dos Dispositivos</CardTitle>
+            <p className="text-sm text-muted-foreground">Informações técnicas detectadas.</p>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              {devices.map((device, index) => (
+                <AccordionItem key={device.deviceId} value={device.deviceId}>
+                  <AccordionTrigger className="text-sm text-left">
+                    {device.label || `Dispositivo ${index + 1}`}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <div className="flex justify-between">
+                        <span>ID:</span>
+                        <span className="font-mono" title={device.deviceId}>{device.deviceId.substring(0, 8)}...</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tipo:</span>
+                        <span>{device.kind}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Grupo:</span>
+                        <span className="font-mono" title={device.groupId}>{device.groupId.substring(0, 8)}...</span>
+                      </div>
+                      <div className="mt-2 p-2 bg-muted rounded border">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Info className="h-3 w-3" />
+                          <span className="font-bold">Info Técnica</span>
+                        </div>
+                        <p>Driver: snd-usb-audio (Provável)</p>
+                        <p>Canais: Mono/Stereo (Auto)</p>
+                        <p>Sample Rate: 44.1kHz / 48kHz</p>
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+              {devices.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center gap-2">
+                  <AlertCircle className="h-8 w-8 opacity-50" />
+                  <span>Nenhum dispositivo detectado.</span>
+                </div>
+              )}
+            </Accordion>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

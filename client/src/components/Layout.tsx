@@ -19,11 +19,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
-        <div className="flex items-center gap-2 font-bold text-lg tracking-tighter">
-          <div className="w-8 h-8 bg-primary text-primary-foreground flex items-center justify-center">
-            <Headphones size={18} />
-          </div>
-          <span>HEADSET.MGR</span>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="TSI Telecom" className="h-8 w-auto object-contain" />
+          <span className="font-bold text-lg tracking-tight text-foreground">TSI Telecom</span>
         </div>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -32,17 +30,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar Navigation */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0",
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="h-full flex flex-col">
-          <div className="p-6 border-b border-border hidden md:flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary text-primary-foreground flex items-center justify-center">
-              <Headphones size={20} />
-            </div>
-            <div>
-              <h1 className="font-bold text-lg tracking-tight leading-none">HEADSET</h1>
-              <span className="text-xs text-muted-foreground font-mono">MANAGER v1.0</span>
+          <div className="p-6 border-b border-sidebar-border hidden md:flex items-center gap-3">
+            <img src="/logo.png" alt="TSI Telecom" className="h-10 w-auto object-contain" />
+            <div className="flex flex-col justify-center">
+              <h1 className="font-bold text-lg tracking-tight leading-none text-sidebar-foreground">TSI Telecom</h1>
+              <span className="text-[10px] font-medium text-primary uppercase tracking-wider mt-1">Headset Manager</span>
             </div>
           </div>
 
@@ -51,10 +47,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               const isActive = location === item.href;
               return (
                 <Link key={item.href} href={item.href} className={cn(
-                    "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-l-2",
+                    "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 rounded-md",
                     isActive 
-                      ? "bg-accent text-accent-foreground border-primary" 
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground border-transparent"
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md" 
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}>
                     <item.icon size={18} />
                     {item.label}
@@ -63,15 +59,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="p-6 border-t border-border">
-            <div className="bg-secondary p-4 text-xs font-mono text-muted-foreground">
+          <div className="p-6 border-t border-sidebar-border">
+            <div className="bg-sidebar-accent/50 p-4 rounded-md border border-sidebar-border text-xs font-mono text-sidebar-foreground/70">
               <div className="flex justify-between mb-2">
                 <span>STATUS</span>
-                <span className="text-green-600 font-bold">ONLINE</span>
+                <span className="text-green-500 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  ONLINE
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>SYSTEM</span>
-                <span>ARCH</span>
+                <span>ARCH LINUX</span>
               </div>
             </div>
           </div>
@@ -79,8 +78,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto h-[calc(100vh-65px)] md:h-screen">
-        <div className="container py-8 md:py-12 max-w-6xl mx-auto">
+      <main className="flex-1 overflow-y-auto h-[calc(100vh-65px)] md:h-screen bg-background relative">
+        {/* Background decorative element */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        
+        <div className="container py-8 md:py-12 max-w-7xl mx-auto relative z-10">
           {children}
         </div>
       </main>
@@ -88,7 +90,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

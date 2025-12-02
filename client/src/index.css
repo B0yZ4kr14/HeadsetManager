@@ -43,85 +43,87 @@
 }
 
 :root {
-  /* Swiss Tech Palette - Light Mode Default */
-  --primary: oklch(0.45 0.24 265); /* #0052CC - Klein Blue */
-  --primary-foreground: oklch(1 0 0); /* White */
+  /* TSI Telecom Brand Colors - Modern Dark Theme Base */
+  /* Primary Blue extracted from logo: approx #1E3A8A (Blue 800/900 range) */
   
-  --background: oklch(0.98 0.005 265); /* #F0F2F5 - Technical Grey */
-  --foreground: oklch(0.15 0 0); /* #1A1A1A - Almost Black */
+  --primary: oklch(0.4 0.15 265); /* Deep Corporate Blue */
+  --primary-foreground: oklch(0.98 0 0); /* White text on primary */
   
-  --card: oklch(1 0 0); /* White */
-  --card-foreground: oklch(0.15 0 0);
+  --background: oklch(0.12 0.01 265); /* Very dark blue-grey background */
+  --foreground: oklch(0.92 0.01 265); /* Light grey text */
   
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0 0);
+  --card: oklch(0.15 0.02 265); /* Slightly lighter dark for cards */
+  --card-foreground: oklch(0.92 0.01 265);
   
-  --secondary: oklch(0.95 0 0); /* Light Grey */
-  --secondary-foreground: oklch(0.15 0 0);
+  --popover: oklch(0.15 0.02 265);
+  --popover-foreground: oklch(0.92 0.01 265);
   
-  --muted: oklch(0.95 0 0);
-  --muted-foreground: oklch(0.45 0 0); /* Medium Grey */
+  --secondary: oklch(0.25 0.05 265); /* Lighter blue for secondary actions */
+  --secondary-foreground: oklch(0.98 0 0);
   
-  --accent: oklch(0.92 0.01 265); /* Light Blue Grey */
-  --accent-foreground: oklch(0.45 0.24 265); /* Klein Blue */
+  --muted: oklch(0.2 0.02 265);
+  --muted-foreground: oklch(0.7 0.02 265);
   
-  --destructive: oklch(0.5 0.2 25); /* Red */
-  --destructive-foreground: oklch(1 0 0);
+  --accent: oklch(0.3 0.1 265); /* Vibrant blue for accents */
+  --accent-foreground: oklch(0.98 0 0);
   
-  --border: oklch(0.85 0 0); /* Distinct Grey Border */
-  --input: oklch(0.85 0 0);
-  --ring: oklch(0.45 0.24 265);
+  --destructive: oklch(0.4 0.15 25); /* Red for errors */
+  --destructive-foreground: oklch(0.98 0 0);
   
-  --radius: 0rem; /* Sharp corners for Swiss Style */
+  --border: oklch(0.25 0.02 265); /* Subtle borders */
+  --input: oklch(0.2 0.02 265);
+  --ring: oklch(0.4 0.15 265); /* Focus ring matches primary */
   
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.15 0 0);
-  --sidebar-primary: oklch(0.45 0.24 265);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.95 0 0);
-  --sidebar-accent-foreground: oklch(0.15 0 0);
-  --sidebar-border: oklch(0.85 0 0);
-  --sidebar-ring: oklch(0.45 0.24 265);
+  --radius: 0.5rem;
+  
+  /* Charts matching the blue theme */
+  --chart-1: oklch(0.5 0.15 265);
+  --chart-2: oklch(0.4 0.15 265);
+  --chart-3: oklch(0.3 0.15 265);
+  --chart-4: oklch(0.6 0.15 265);
+  --chart-5: oklch(0.7 0.15 265);
+  
+  /* Sidebar specific */
+  --sidebar: oklch(0.1 0.01 265); /* Darker sidebar */
+  --sidebar-foreground: oklch(0.92 0.01 265);
+  --sidebar-primary: oklch(0.4 0.15 265);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.2 0.02 265);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.2 0.02 265);
+  --sidebar-ring: oklch(0.4 0.15 265);
 }
 
+/* Force Dark Mode by default since we are building a Modern Dark theme */
 .dark {
-  /* Swiss Tech Palette - Dark Mode */
-  --background: oklch(0.1 0 0); /* #0A0A0A */
-  --foreground: oklch(0.95 0 0);
-  
-  --card: oklch(0.12 0 0);
-  --card-foreground: oklch(0.95 0 0);
-  
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.95 0 0);
-  
-  --primary: oklch(0.45 0.24 265); /* Keep Klein Blue */
-  --primary-foreground: oklch(1 0 0);
-  
-  --secondary: oklch(0.2 0 0);
-  --secondary-foreground: oklch(0.95 0 0);
-  
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.6 0 0);
-  
-  --accent: oklch(0.2 0 0);
-  --accent-foreground: oklch(0.95 0 0);
-  
-  --destructive: oklch(0.5 0.2 25);
-  --destructive-foreground: oklch(1 0 0);
-  
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.45 0.24 265);
-  
-  --sidebar: oklch(0.12 0 0);
-  --sidebar-foreground: oklch(0.95 0 0);
-  --sidebar-primary: oklch(0.45 0.24 265);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.2 0 0);
-  --sidebar-accent-foreground: oklch(0.95 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.45 0.24 265);
+  /* Same values as root since we are dark-first */
+  --primary: oklch(0.4 0.15 265);
+  --primary-foreground: oklch(0.98 0 0);
+  --background: oklch(0.12 0.01 265);
+  --foreground: oklch(0.92 0.01 265);
+  --card: oklch(0.15 0.02 265);
+  --card-foreground: oklch(0.92 0.01 265);
+  --popover: oklch(0.15 0.02 265);
+  --popover-foreground: oklch(0.92 0.01 265);
+  --secondary: oklch(0.25 0.05 265);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.2 0.02 265);
+  --muted-foreground: oklch(0.7 0.02 265);
+  --accent: oklch(0.3 0.1 265);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.4 0.15 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.25 0.02 265);
+  --input: oklch(0.2 0.02 265);
+  --ring: oklch(0.4 0.15 265);
+  --sidebar: oklch(0.1 0.01 265);
+  --sidebar-foreground: oklch(0.92 0.01 265);
+  --sidebar-primary: oklch(0.4 0.15 265);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.2 0.02 265);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.2 0.02 265);
+  --sidebar-ring: oklch(0.4 0.15 265);
 }
 
 @layer base {
@@ -130,21 +132,19 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02"; /* Inter features for technical look */
+    /* Subtle gradient background for depth */
+    background-image: radial-gradient(circle at top right, oklch(0.18 0.05 265 / 0.3), transparent 40%);
   }
-  
-  /* Typography Overrides for Swiss Style */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
-  }
-  
-  h1 {
-    @apply text-4xl md:text-6xl lg:text-7xl;
-    letter-spacing: -0.04em;
-  }
-  
-  code, pre {
-    @apply font-mono text-sm;
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
   }
 }
 
@@ -153,34 +153,27 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    max-width: 1400px; /* Wider container for dashboard feel */
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-  
-  /* Swiss Grid Utilities */
-  .swiss-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 1rem;
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
   }
-  
-  .swiss-card {
-    @apply bg-card border border-border p-6 relative overflow-hidden;
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
   }
-  
-  .swiss-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background-color: transparent;
-    transition: background-color 0.2s ease;
-  }
-  
-  .swiss-card:hover::before {
-    @apply bg-primary;
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1280px;
+    }
   }
 }
