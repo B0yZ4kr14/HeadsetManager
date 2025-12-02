@@ -50,8 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {navItems.map((item) => {
               const isActive = location === item.href;
               return (
-                <Link key={item.href} href={item.href}>
-                  <a className={cn(
+                <Link key={item.href} href={item.href} className={cn(
                     "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors border-l-2",
                     isActive 
                       ? "bg-accent text-accent-foreground border-primary" 
@@ -59,7 +58,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   )}>
                     <item.icon size={18} />
                     {item.label}
-                  </a>
                 </Link>
               );
             })}
