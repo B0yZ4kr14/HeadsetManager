@@ -2,7 +2,8 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Mic, Volume2, Usb, CheckCircle2, AlertCircle, RefreshCw, Headphones, Play, Square } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Activity, Mic, Volume2, Usb, CheckCircle2, AlertCircle, RefreshCw, Headphones, Play, Square, Settings2, Info } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +11,7 @@ export default function Home() {
   const [isScanning, setIsScanning] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedMic, setSelectedMic] = useState("default");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
 
@@ -77,7 +79,7 @@ export default function Home() {
     
     setIsRecording(true);
     toast.info("Gravando microfone...", {
-      description: "Fale algo para testar (5 segundos)",
+      description: `Testando dispositivo: ${selectedMic === 'default' ? 'Padrão do Sistema' : selectedMic}`,
     });
 
     setTimeout(() => {
@@ -163,7 +165,46 @@ export default function Home() {
                 <CardTitle>Monitoramento de Áudio</CardTitle>
                 <CardDescription>Visualização em tempo real da entrada do microfone.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <label className="text-sm font-medium mb-2 block">Dispositivo de Entrada</label>
+                    <Select value={selectedMic} onValueChange={setSelectedMic}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o microfone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Padrão do Sistema</SelectItem>
+                        <SelectItem value="fanvil">Fanvil HT301-U (USB Audio)</SelectItem>
+                        <SelectItem value="attimo">Attimo HS01 (USB Audio)</SelectItem>
+                        <SelectItem value="internal">Microfone Interno (HDA Intel)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="pt-6">
+                    <Button 
+                      variant={isRecording ? "destructive" : isPlaying ? "secondary" : "outline"}
+                      onClick={handleMicTest}
+                      disabled={isRecording || isPlaying}
+                      className="w-full"
+                    >
+                      {isRecording ? (
+                        <>
+                          <Square className="mr-2 h-4 w-4 animate-pulse" /> Gravando...
+                        </>
+                      ) : isPlaying ? (
+                        <>
+                          <Play className="mr-2 h-4 w-4" /> Reproduzindo...
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="mr-2 h-4 w-4" /> Testar (5s)
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="bg-secondary/30 rounded-md p-4 border border-border">
                   <canvas 
                     ref={canvasRef} 
@@ -171,27 +212,6 @@ export default function Home() {
                     height={100} 
                     className="w-full h-[100px]"
                   />
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Button 
-                    variant={isRecording ? "destructive" : isPlaying ? "secondary" : "outline"}
-                    onClick={handleMicTest}
-                    disabled={isRecording || isPlaying}
-                  >
-                    {isRecording ? (
-                      <>
-                        <Square className="mr-2 h-4 w-4 animate-pulse" /> Gravando...
-                      </>
-                    ) : isPlaying ? (
-                      <>
-                        <Play className="mr-2 h-4 w-4" /> Reproduzindo...
-                      </>
-                    ) : (
-                      <>
-                        <Mic className="mr-2 h-4 w-4" /> Testar Microfone (5s)
-                      </>
-                    )}
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -204,28 +224,53 @@ export default function Home() {
               <CardContent>
                 <div className="space-y-4">
                   {/* Device 1 */}
-                  <div className="flex items-center justify-between p-4 border border-border bg-secondary/20">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 bg-primary/10 flex items-center justify-center text-primary">
-                        <Headphones size={20} />
+                  <div className="border border-border bg-secondary/20 rounded-lg overflow-hidden">
+                    <div className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 bg-primary/10 flex items-center justify-center text-primary rounded-md">
+                          <Headphones size={20} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm">Fanvil HT301-U</p>
+                          <p className="text-xs text-muted-foreground font-mono">ID: 2849:3011</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-sm">Fanvil HT301-U</p>
-                        <p className="text-xs text-muted-foreground font-mono">ID: 2849:3011</p>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo
+                        </Badge>
+                        <Button variant="ghost" size="sm">Configurar</Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo
-                      </Badge>
-                      <Button variant="ghost" size="sm">Configurar</Button>
+                    
+                    {/* Detalhes Técnicos Expandidos */}
+                    <div className="bg-background/50 p-4 border-t border-border grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Fabricante</span>
+                        <span className="font-medium">Fanvil Technology Co., Ltd.</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Driver</span>
+                        <span className="font-medium">snd-usb-audio (ALSA)</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Codecs Suportados</span>
+                        <div className="flex gap-1 mt-1">
+                          <Badge variant="secondary" className="text-[10px] h-5">PCM</Badge>
+                          <Badge variant="secondary" className="text-[10px] h-5">S16_LE</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block text-xs uppercase tracking-wider">Taxa de Amostragem</span>
+                        <span className="font-medium">44.1kHz / 48kHz</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Device 2 */}
-                  <div className="flex items-center justify-between p-4 border border-border bg-secondary/20 opacity-75">
+                  <div className="flex items-center justify-between p-4 border border-border bg-secondary/20 opacity-75 rounded-lg">
                     <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 bg-muted flex items-center justify-center text-muted-foreground">
+                      <div className="h-10 w-10 bg-muted flex items-center justify-center text-muted-foreground rounded-md">
                         <Headphones size={20} />
                       </div>
                       <div>
