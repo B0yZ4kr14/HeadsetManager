@@ -2,15 +2,95 @@ import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Activity, Mic, Volume2, Usb, CheckCircle2, AlertCircle, RefreshCw, Headphones } from "lucide-react";
-import { useState } from "react";
+import { Activity, Mic, Volume2, Usb, CheckCircle2, AlertCircle, RefreshCw, Headphones, Play, Square } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 export default function Home() {
   const [isScanning, setIsScanning] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number>(0);
+
+  // Simulação de conexão/desconexão para demonstração de Toasts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      toast("Novo dispositivo detectado", {
+        description: "Fanvil HT301-U conectado via USB",
+        action: {
+          label: "Configurar",
+          onClick: () => console.log("Configurar"),
+        },
+      });
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Simulação do gráfico de espectro de áudio
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const draw = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      ctx.clearRect(0, 0, width, height);
+
+      const barWidth = 4;
+      const gap = 2;
+      const bars = Math.floor(width / (barWidth + gap));
+
+      ctx.fillStyle = "#0052CC"; // Cor primária do tema
+
+      for (let i = 0; i < bars; i++) {
+        // Simula dados de áudio com ruído perlin simplificado
+        const time = Date.now() * 0.005;
+        const value = Math.abs(Math.sin(i * 0.1 + time) * Math.cos(i * 0.05 - time)) * 0.8;
+        const barHeight = value * height;
+
+        ctx.fillRect(i * (barWidth + gap), height - barHeight, barWidth, barHeight);
+      }
+
+      animationRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => cancelAnimationFrame(animationRef.current);
+  }, []);
 
   const handleScan = () => {
     setIsScanning(true);
-    setTimeout(() => setIsScanning(false), 2000);
+    setTimeout(() => {
+      setIsScanning(false);
+      toast.success("Escaneamento concluído", {
+        description: "2 dispositivos encontrados e atualizados.",
+      });
+    }, 2000);
+  };
+
+  const handleMicTest = () => {
+    if (isRecording || isPlaying) return;
+    
+    setIsRecording(true);
+    toast.info("Gravando microfone...", {
+      description: "Fale algo para testar (5 segundos)",
+    });
+
+    setTimeout(() => {
+      setIsRecording(false);
+      setIsPlaying(true);
+      toast.success("Reproduzindo áudio...", {
+        description: "Verifique se você consegue ouvir sua voz.",
+      });
+
+      setTimeout(() => {
+        setIsPlaying(false);
+      }, 5000);
+    }, 5000);
   };
 
   return (
@@ -75,64 +155,104 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Active Devices List */}
         <div className="grid gap-4 md:grid-cols-7">
-          <Card className="col-span-4 swiss-card">
-            <CardHeader>
-              <CardTitle>Dispositivos Gerenciados</CardTitle>
-              <CardDescription>Lista de headsets configurados e ativos no momento.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Device 1 */}
-                <div className="flex items-center justify-between p-4 border border-border bg-secondary/20">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-primary/10 flex items-center justify-center text-primary">
-                      <Headphones size={20} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm">Fanvil HT301-U</p>
-                      <p className="text-xs text-muted-foreground font-mono">ID: 2849:3011</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo
-                    </Badge>
-                    <Button variant="ghost" size="sm">Configurar</Button>
-                  </div>
+          {/* Device List & Audio Visualizer */}
+          <div className="col-span-4 space-y-4">
+            <Card className="swiss-card">
+              <CardHeader>
+                <CardTitle>Monitoramento de Áudio</CardTitle>
+                <CardDescription>Visualização em tempo real da entrada do microfone.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-secondary/30 rounded-md p-4 border border-border">
+                  <canvas 
+                    ref={canvasRef} 
+                    width={600} 
+                    height={100} 
+                    className="w-full h-[100px]"
+                  />
                 </div>
+                <div className="mt-4 flex justify-end">
+                  <Button 
+                    variant={isRecording ? "destructive" : isPlaying ? "secondary" : "outline"}
+                    onClick={handleMicTest}
+                    disabled={isRecording || isPlaying}
+                  >
+                    {isRecording ? (
+                      <>
+                        <Square className="mr-2 h-4 w-4 animate-pulse" /> Gravando...
+                      </>
+                    ) : isPlaying ? (
+                      <>
+                        <Play className="mr-2 h-4 w-4" /> Reproduzindo...
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="mr-2 h-4 w-4" /> Testar Microfone (5s)
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-                {/* Device 2 */}
-                <div className="flex items-center justify-between p-4 border border-border bg-secondary/20 opacity-75">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 bg-muted flex items-center justify-center text-muted-foreground">
-                      <Headphones size={20} />
+            <Card className="swiss-card">
+              <CardHeader>
+                <CardTitle>Dispositivos Gerenciados</CardTitle>
+                <CardDescription>Lista de headsets configurados e ativos no momento.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Device 1 */}
+                  <div className="flex items-center justify-between p-4 border border-border bg-secondary/20">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-primary/10 flex items-center justify-center text-primary">
+                        <Headphones size={20} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">Fanvil HT301-U</p>
+                        <p className="text-xs text-muted-foreground font-mono">ID: 2849:3011</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-sm">Attimo HS01</p>
-                      <p className="text-xs text-muted-foreground font-mono">ID: 1a2b:3c4d</p>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <CheckCircle2 className="w-3 h-3 mr-1" /> Ativo
+                      </Badge>
+                      <Button variant="ghost" size="sm">Configurar</Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="bg-secondary text-muted-foreground border-border">
-                      Desconectado
-                    </Badge>
-                    <Button variant="ghost" size="sm">Histórico</Button>
+
+                  {/* Device 2 */}
+                  <div className="flex items-center justify-between p-4 border border-border bg-secondary/20 opacity-75">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-muted flex items-center justify-center text-muted-foreground">
+                        <Headphones size={20} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">Attimo HS01</p>
+                        <p className="text-xs text-muted-foreground font-mono">ID: 1a2b:3c4d</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="bg-secondary text-muted-foreground border-border">
+                        Desconectado
+                      </Badge>
+                      <Button variant="ghost" size="sm">Histórico</Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Recent Logs */}
-          <Card className="col-span-3 swiss-card bg-black text-white border-none">
+          <Card className="col-span-3 swiss-card bg-[#0A0A0A] border-none text-gray-300 font-mono text-sm h-full min-h-[500px] flex flex-col">
             <CardHeader>
               <CardTitle className="text-white">Terminal Log</CardTitle>
               <CardDescription className="text-gray-400">Últimas atividades do daemon.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="font-mono text-xs space-y-2 text-gray-300">
+            <CardContent className="flex-1 flex flex-col">
+              <div className="flex-1 overflow-y-auto space-y-2 text-gray-300 custom-scrollbar">
                 <div className="flex gap-2">
                   <span className="text-blue-400">[14:20:01]</span>
                   <span>INFO: Scanning USB bus...</span>
@@ -153,6 +273,18 @@ export default function Home() {
                   <span className="text-blue-400">[14:25:10]</span>
                   <span>INFO: Volume adjusted to 85%</span>
                 </div>
+                {isRecording && (
+                   <div className="flex gap-2 animate-pulse">
+                   <span className="text-yellow-400">[{new Date().toLocaleTimeString()}]</span>
+                   <span>INFO: Recording audio sample (5s)...</span>
+                 </div>
+                )}
+                {isPlaying && (
+                   <div className="flex gap-2">
+                   <span className="text-green-400">[{new Date().toLocaleTimeString()}]</span>
+                   <span>SUCCESS: Playing back audio sample...</span>
+                 </div>
+                )}
               </div>
             </CardContent>
           </Card>
