@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Mic, Play, Square, Activity, Volume2, RefreshCw, AlertCircle, Cpu, Save } from "lucide-react";
+import { Mic, Play, Square, Volume2, RefreshCw, AlertCircle, Save, Activity } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { CircularMeter } from "@/components/CircularMeter";
+import { SpectrumChart } from "@/components/SpectrumChart";
 import { cn } from "@/lib/utils";
 
 interface AudioDevice {
@@ -30,6 +31,9 @@ export default function Home() {
   const [isNoiseTestActive, setIsNoiseTestActive] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [spectrumData, setSpectrumData] = useState<number[]>(new Array(32).fill(0));
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [noiseLevel, setNoiseLevel] = useState(0);
   
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -92,50 +96,35 @@ export default function Home() {
     }
   }, [stopVisualization]);
 
-  // Effects
-  useEffect(() => {
-    getDevices();
-    return () => {
-      cleanupAudioResources();
-    };
-  }, [cleanupAudioResources]);
-
-  // Device management
+  // Get audio devices
   const getDevices = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      
       const deviceList = await navigator.mediaDevices.enumerateDevices();
       const audioInputs = deviceList.filter(device => device.kind === 'audioinput');
-      
-      setDevices(audioInputs.map(d => ({
-        deviceId: d.deviceId,
-        label: d.label,
-        kind: d.kind,
-        groupId: d.groupId,
-      })));
+      setDevices(audioInputs as AudioDevice[]);
       
       if (audioInputs.length > 0 && !selectedDeviceId) {
         setSelectedDeviceId(audioInputs[0].deviceId);
       }
       
-      stream.getTracks().forEach(track => track.stop());
       setPermissionDenied(false);
     } catch (error) {
-      console.error("Error accessing audio devices:", error);
+      console.error('Error getting devices:', error);
       setPermissionDenied(true);
-      toast.error("Permissão de microfone negada");
+      toast.error("Permissão negada", {
+        description: "Por favor, permita o acesso ao microfone para usar os recursos de teste.",
+      });
     }
   };
 
-  // Spectrum visualization
-  const drawSpectrum = useCallback(() => {
-    if (!analyserRef.current || !canvasRef.current) return;
+  // Visualize audio
+  const visualize = useCallback(() => {
+    if (!analyserRef.current) return;
 
     const analyser = analyserRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
@@ -143,64 +132,42 @@ export default function Home() {
       animationFrameRef.current = requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
 
-      ctx.fillStyle = 'rgb(0, 0, 0)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height;
-        const hue = (i / bufferLength) * 360;
-        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
+      // Update spectrum data (take 32 samples)
+      const samples = 32;
+      const step = Math.floor(bufferLength / samples);
+      const newSpectrumData = [];
+      for (let i = 0; i < samples; i++) {
+        newSpectrumData.push(dataArray[i * step]);
       }
+      setSpectrumData(newSpectrumData);
+
+      // Calculate audio level (0-100)
+      const average = dataArray.reduce((a, b) => a + b, 0) / bufferLength;
+      setAudioLevel(Math.min(100, (average / 255) * 100));
+
+      // Calculate noise level
+      const noiseThreshold = 30;
+      const noiseCount = dataArray.filter(v => v < noiseThreshold).length;
+      const noisePercentage = (noiseCount / bufferLength) * 100;
+      setNoiseLevel(100 - noisePercentage);
     };
 
     draw();
   }, []);
 
-  const startVisualization = async (stream: MediaStream) => {
-    if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    
-    const audioContext = audioContextRef.current;
-    
-    if (audioContext.state === 'suspended') {
-      await audioContext.resume();
-    }
-
-    const source = audioContext.createMediaStreamSource(stream);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    analyser.smoothingTimeConstant = 0.8;
-    source.connect(analyser);
-    analyserRef.current = analyser;
-
-    drawSpectrum();
-  };
-
-  // Recording functions
+  // Start recording
   const startRecording = async () => {
     if (!selectedDeviceId) {
-      toast.error("Selecione um dispositivo primeiro");
+      toast.error("Nenhum dispositivo selecionado");
       return;
     }
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { 
-          deviceId: { exact: selectedDeviceId },
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false
-        }
+        audio: { deviceId: selectedDeviceId }
       });
       
       streamRef.current = stream;
-      startVisualization(stream);
 
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -212,135 +179,133 @@ export default function Home() {
         }
       };
 
-      mediaRecorder.onstop = async () => {
+      mediaRecorder.onstop = () => {
         const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
-        stopVisualization();
-        
-        stream.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-        
-        // Save metadata only if recording is valid (> 1 second)
-        if (recordingTime > 1) {
-          saveRecordingMutation.mutate({
-            testType: "recording",
-            duration: recordingTime,
-            notes: `Dispositivo: ${devices.find(d => d.deviceId === selectedDeviceId)?.label || 'Desconhecido'}`,
-          });
-        }
-        
-        // Auto-play
-        const audio = new Audio(url);
-        audio.onplay = () => setIsPlaying(true);
-        audio.onended = () => setIsPlaying(false);
-        audio.play().catch(e => console.error("Auto-play failed:", e));
-        toast.success("Gravação finalizada. Reproduzindo...");
       };
+
+      // Setup audio context for visualization
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+      const source = audioContext.createMediaStreamSource(stream);
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 256;
+      analyserRef.current = analyser;
+      source.connect(analyser);
+
+      visualize();
 
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-      
+
+      // Start timer
       timerIntervalRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
       }, 1000);
 
-      toast.info("Gravação iniciada...");
+      toast.success("Gravação iniciada");
     } catch (error) {
-      console.error("Error starting recording:", error);
+      console.error('Error starting recording:', error);
       toast.error("Erro ao iniciar gravação");
     }
   };
 
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+  // Stop recording
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
       }
-    }
-  }, []);
 
-  const playAudio = () => {
-    if (!audioUrl) return;
-    
-    const audio = new Audio(audioUrl);
-    audio.onplay = () => setIsPlaying(true);
-    audio.onended = () => setIsPlaying(false);
-    audio.onerror = () => {
-      setIsPlaying(false);
-      toast.error("Erro ao reproduzir áudio");
-    };
-    audio.play().catch(e => {
-      console.error("Playback error:", e);
-      toast.error("Erro ao reproduzir áudio");
-    });
+      stopVisualization();
+
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+
+      // Save recording metadata
+      if (recordingTime > 0 && selectedDeviceId) {
+        saveRecordingMutation.mutate({
+          testType: "recording" as const,
+          duration: recordingTime,
+          quality: audioLevel > 70 ? "excellent" : audioLevel > 50 ? "good" : audioLevel > 30 ? "fair" : "poor",
+          noiseLevel: Math.round(noiseLevel),
+          spectrumData: JSON.stringify(spectrumData),
+        });
+      }
+
+      toast.success("Gravação finalizada");
+    }
   };
 
-  const downloadAudio = () => {
-    if (!audioUrl || !audioBlob) return;
-    
-    const a = document.createElement('a');
-    a.href = audioUrl;
-    a.download = `gravacao_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    toast.success("Download iniciado");
+  // Play recording
+  const playRecording = () => {
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+      setIsPlaying(true);
+      audio.onended = () => setIsPlaying(false);
+    }
+  };
+
+  // Save recording to file
+  const saveRecording = () => {
+    if (audioBlob) {
+      const url = URL.createObjectURL(audioBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `headset-recording-${Date.now()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success("Gravação salva!");
+    }
   };
 
   // Noise test
-  const toggleNoiseTest = async () => {
-    if (isNoiseTestActive) {
-      stopNoiseTest();
-    } else {
-      startNoiseTest();
-    }
-  };
-
   const startNoiseTest = async () => {
-    if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    
-    const ctx = audioContextRef.current;
-    
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
+    if (!selectedDeviceId) {
+      toast.error("Nenhum dispositivo selecionado");
+      return;
     }
 
-    const bufferSize = ctx.sampleRate * 2;
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
+    try {
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
 
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+      // Create white noise
+      const bufferSize = audioContext.sampleRate * 2;
+      const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(audioContext.destination);
+      source.start();
+      
+      noiseSourceRef.current = source;
+      setIsNoiseTestActive(true);
+      toast.success("Teste de ruído iniciado");
+    } catch (error) {
+      console.error('Error starting noise test:', error);
+      toast.error("Erro ao iniciar teste de ruído");
     }
-
-    const noiseSource = ctx.createBufferSource();
-    noiseSource.buffer = buffer;
-    noiseSource.loop = true;
-    
-    const gainNode = ctx.createGain();
-    gainNode.gain.value = 0.5;
-    
-    noiseSource.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    
-    noiseSource.start();
-    noiseSourceRef.current = noiseSource;
-    
-    setIsNoiseTestActive(true);
-    toast.warning("Teste de ruído ativo");
-    
-    startRecording();
   };
 
-  const stopNoiseTest = useCallback(() => {
+  const stopNoiseTest = () => {
     if (noiseSourceRef.current) {
       try {
         noiseSourceRef.current.stop();
@@ -349,219 +314,266 @@ export default function Home() {
       }
       noiseSourceRef.current = null;
     }
-    setIsNoiseTestActive(false);
-    if (isRecording) {
-      stopRecording();
-    }
-    toast.info("Teste de ruído parado");
-  }, [isRecording, stopRecording]);
 
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+
+    setIsNoiseTestActive(false);
+    toast.success("Teste de ruído finalizado");
+  };
+
+  // Effects
+  useEffect(() => {
+    getDevices();
+    return () => {
+      cleanupAudioResources();
+    };
+  }, [cleanupAudioResources]);
+
+  // Format time
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div className="space-y-6 pb-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">Visão geral do sistema de áudio e diagnósticos em tempo real.</p>
+    <TooltipProvider>
+      <div className="container py-8 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Visão geral do sistema de áudio e diagnósticos em tempo real
+            </p>
+          </div>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={getDevices}
+                className="border-neon-blue"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Atualizar dispositivos</TooltipContent>
+          </Tooltip>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={getDevices} variant="outline" className="backdrop-blur-sm bg-background/50">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Escanear
-          </Button>
-        </div>
-      </div>
 
-      {permissionDenied && (
-        <div className="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-lg flex items-center gap-3 backdrop-blur-md">
-          <AlertCircle className="h-5 w-5" />
-          <span>Permissão de microfone negada. Por favor, permita o acesso no navegador para usar os recursos de teste.</span>
-        </div>
-      )}
+        {/* Permission Denied Alert */}
+        {permissionDenied && (
+          <Card className="neon-card-orange p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 neon-orange flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground">Permissão de microfone negada</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Por favor, permita o acesso no navegador para usar os recursos de teste.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
 
-      {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        
-        {/* Main Module: Spectrum Analyzer (Span 8) */}
-        <Card className="md:col-span-8 border-white/10 bg-card/50 backdrop-blur-md shadow-xl overflow-hidden relative group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-          <CardHeader className="relative z-10">
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-primary" />
-              Análise de Espectro
-            </CardTitle>
-            <CardDescription>Visualização de frequência em tempo real</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 relative z-10">
-            <div className="bg-black/80 rounded-xl p-1 h-64 flex items-center justify-center relative overflow-hidden border border-white/10 shadow-inner">
-              <canvas ref={canvasRef} width="800" height="256" className="w-full h-full" />
-              {!isRecording && !isNoiseTestActive && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-                  <span className="text-muted-foreground text-sm flex items-center gap-2">
-                    <Mic className="h-4 w-4" /> Inicie um teste para visualizar
-                  </span>
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Spectrum Analyzer - Large */}
+          <Card className="neon-card-blue lg:col-span-2 lg:row-span-2 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity className="h-5 w-5 neon-blue" />
+              <h2 className="text-xl font-bold neon-blue">Análise de Espectro</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              Visualização de frequência em tempo real
+            </p>
+            
+            <div className="h-[400px] flex items-center justify-center">
+              {isRecording ? (
+                <SpectrumChart data={spectrumData} height={400} />
+              ) : (
+                <div className="text-center text-muted-foreground">
+                  <Mic className="h-16 w-16 mx-auto mb-4 opacity-30" />
+                  <p>Inicie um teste para visualizar</p>
                 </div>
               )}
             </div>
+          </Card>
 
-            <TooltipProvider>
-              <div className="flex gap-3 flex-wrap">
-                {!isRecording ? (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button onClick={startRecording} className="flex-1 h-12 text-base shadow-lg shadow-primary/20" variant="default">
-                        <Mic className="mr-2 h-5 w-5" /> Iniciar Gravação
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Gravar áudio do microfone selecionado</p>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button onClick={stopRecording} className="flex-1 h-12 text-base animate-pulse bg-destructive hover:bg-destructive/90 text-white shadow-lg shadow-destructive/20">
-                        <Square className="mr-2 h-5 w-5" /> Parar ({formatTime(recordingTime)})
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Finalizar gravação em andamento</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      onClick={toggleNoiseTest} 
-                      variant={isNoiseTestActive ? "destructive" : "secondary"}
-                      className="flex-1 h-12 text-base backdrop-blur-sm"
-                    >
-                      <Volume2 className="mr-2 h-5 w-5" />
-                      {isNoiseTestActive ? "Parar Ruído" : "Teste de Ruído"}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isNoiseTestActive ? "Desativar teste de ruído branco" : "Testar cancelamento de ruído com white noise"}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            </TooltipProvider>
-          </CardContent>
-        </Card>
+          {/* Audio Level Meter */}
+          <Card className="neon-card-orange p-6 flex flex-col items-center justify-center">
+            <CircularMeter
+              value={audioLevel}
+              label="NÍVEL"
+              color="orange"
+              size={180}
+            />
+          </Card>
 
-        {/* Side Module: Device Control (Span 4) */}
-        <div className="md:col-span-4 space-y-6">
-          <Card className="border-white/10 bg-card/50 backdrop-blur-md shadow-lg h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Cpu className="h-4 w-4 text-primary" />
-                Dispositivo Ativo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Entrada</label>
+          {/* Noise Level Meter */}
+          <Card className="neon-card-green p-6 flex flex-col items-center justify-center">
+            <CircularMeter
+              value={noiseLevel}
+              label="QUALIDADE"
+              color="green"
+              size={180}
+            />
+          </Card>
+
+          {/* Controls */}
+          <Card className="neon-card-blue lg:col-span-2 p-6">
+            <h2 className="text-xl font-bold neon-blue mb-4">Controles</h2>
+            
+            <div className="space-y-4">
+              {/* Device Selection */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  DISPOSITIVO
+                </label>
                 <Select value={selectedDeviceId} onValueChange={setSelectedDeviceId}>
-                  <SelectTrigger className="bg-background/50 border-white/10 h-10">
-                    <SelectValue placeholder="Selecione..." />
+                  <SelectTrigger className="border-neon-blue/30">
+                    <SelectValue placeholder="Selecione um dispositivo" />
                   </SelectTrigger>
                   <SelectContent>
                     {devices.map((device) => (
                       <SelectItem key={device.deviceId} value={device.deviceId}>
-                        {device.label || `Microfone ${device.deviceId.slice(0, 5)}...`}
+                        {device.label || `Dispositivo ${device.deviceId.slice(0, 8)}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
+              {/* Recording Controls */}
+              <div className="flex flex-wrap gap-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={isRecording ? stopRecording : startRecording}
+                      disabled={!selectedDeviceId || permissionDenied}
+                      className={cn(
+                        "flex-1 min-w-[140px]",
+                        isRecording
+                          ? "bg-destructive hover:bg-destructive/90"
+                          : "bg-primary hover:bg-primary/90"
+                      )}
+                    >
+                      {isRecording ? (
+                        <>
+                          <Square className="mr-2 h-4 w-4" />
+                          Parar ({formatTime(recordingTime)})
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="mr-2 h-4 w-4" />
+                          Iniciar Gravação
+                        </>
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {isRecording ? "Parar gravação" : "Iniciar gravação de áudio"}
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      onClick={isNoiseTestActive ? stopNoiseTest : startNoiseTest}
+                      disabled={!selectedDeviceId || permissionDenied || isRecording}
+                      variant="outline"
+                      className={cn(
+                        "flex-1 min-w-[140px]",
+                        isNoiseTestActive && "border-neon-orange"
+                      )}
+                    >
+                      <Volume2 className="mr-2 h-4 w-4" />
+                      {isNoiseTestActive ? "Parar Ruído" : "Teste de Ruído"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Reproduzir ruído branco para teste de qualidade
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+
+              {/* Playback Controls */}
               {audioUrl && (
-                <div className="p-4 rounded-lg bg-secondary/10 border border-white/5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">Última Gravação</span>
-                    <span className="text-xs text-primary">{formatTime(recordingTime)}</span>
-                  </div>
-                  <TooltipProvider>
-                    <div className="flex gap-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="sm" className="flex-1" variant="outline" onClick={playAudio} disabled={isPlaying}>
-                            {isPlaying ? <Activity className="h-3 w-3 animate-pulse mr-1" /> : <Play className="h-3 w-3 mr-1" />}
-                            Reproduzir
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Ouvir a gravação de áudio</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button size="sm" variant="default" className="shadow-md" onClick={downloadAudio}>
-                            <Save className="h-4 w-4 mr-1" />
-                            Salvar
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Salvar gravação no seu computador</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </TooltipProvider>
+                <div className="flex gap-3 pt-4 border-t border-border">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={playRecording}
+                        disabled={isPlaying}
+                        variant="outline"
+                        className="flex-1 border-neon-green"
+                      >
+                        <Play className="mr-2 h-4 w-4" />
+                        Reproduzir
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Reproduzir gravação</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={saveRecording}
+                        variant="outline"
+                        className="flex-1 border-neon-blue"
+                      >
+                        <Save className="mr-2 h-4 w-4" />
+                        Salvar
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Salvar gravação localmente</TooltipContent>
+                  </Tooltip>
                 </div>
               )}
-            </CardContent>
+            </div>
+          </Card>
+
+          {/* Device Status */}
+          <Card className="neon-card-green p-6">
+            <h2 className="text-xl font-bold neon-green mb-4">Status do Dispositivo</h2>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Dispositivo Ativo</span>
+                <span className="text-sm font-medium text-foreground">
+                  {devices.find(d => d.deviceId === selectedDeviceId)?.label?.slice(0, 20) || "Nenhum"}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Status</span>
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "h-2 w-2 rounded-full pulse-neon",
+                    selectedDeviceId ? "bg-green-500" : "bg-gray-500"
+                  )} />
+                  <span className="text-sm font-medium">
+                    {selectedDeviceId ? "ONLINE" : "OFFLINE"}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Sistema</span>
+                <span className="text-sm font-medium">
+                  {navigator.userAgent.includes('Windows') ? 'WINDOWS' : 
+                   navigator.userAgent.includes('Linux') ? 'LINUX' : 'OUTRO'}
+                </span>
+              </div>
+            </div>
           </Card>
         </div>
       </div>
-
-      {/* Technical Details Accordion */}
-      <Card className="border-white/10 bg-card/50 backdrop-blur-md">
-        <CardContent className="pt-6">
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="details" className="border-white/10">
-              <AccordionTrigger className="text-sm font-medium hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-primary" />
-                  Detalhes Técnicos
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-4">
-                {devices.map((device, idx) => (
-                  <div 
-                    key={device.deviceId}
-                    className={cn(
-                      "p-4 rounded-lg border transition-colors",
-                      device.deviceId === selectedDeviceId 
-                        ? "bg-primary/10 border-primary/30" 
-                        : "bg-secondary/10 border-white/5"
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">
-                        {device.label || `Dispositivo ${idx + 1}`}
-                      </span>
-                      {device.deviceId === selectedDeviceId && (
-                        <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">ATIVO</span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p><span className="font-medium">ID:</span> {device.deviceId.slice(0, 20)}...</p>
-                      <p><span className="font-medium">Tipo:</span> {device.kind}</p>
-                    </div>
-                  </div>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </CardContent>
-      </Card>
-    </div>
+    </TooltipProvider>
   );
 }

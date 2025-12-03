@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { Headphones, Terminal, FileText, Settings, Menu, X, HelpCircle, Wrench, History } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import BrandLogo from "@/components/BrandLogo";
 import { UpdateNotification } from "@/components/UpdateNotification";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -23,8 +22,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
-        <BrandLogo variant="mobile" />
+      <div className="md:hidden flex items-center justify-between p-4 border-b border-neon-blue/20 bg-card/50 backdrop-blur-sm">
+        <img
+          src="/tsi-logo-new.png"
+          alt="tSitelecom"
+          className="h-10 object-contain"
+          style={{
+            filter: "drop-shadow(0 0 10px hsl(217, 91%, 60%))",
+          }}
+        />
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
         </Button>
@@ -36,8 +42,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="h-full flex flex-col">
-          <div className="p-6 border-b border-sidebar-border hidden md:flex items-center gap-3">
-            <BrandLogo variant="sidebar" />
+          <div className="p-6 border-b border-neon-blue/20 hidden md:flex flex-col items-center gap-2">
+            <img
+              src="/tsi-logo-new.png"
+              alt="tSitelecom"
+              className="h-12 object-contain"
+              style={{
+                filter: "drop-shadow(0 0 15px hsl(217, 91%, 60%))",
+              }}
+            />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-light">
+              Headset Manager
+            </span>
           </div>
 
           <nav className="flex-1 p-4 space-y-1">

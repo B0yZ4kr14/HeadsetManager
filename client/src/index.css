@@ -1,50 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
-    /* TSI Brand Colors - Professional Blue Palette */
-    --background: 216 25% 8%;           /* Deep navy background */
-    --foreground: 210 40% 98%;          /* Almost white text */
-    
-    --card: 217 24% 12%;                /* Slightly lighter than background */
-    --card-foreground: 210 40% 98%;
-    
-    --popover: 217 24% 12%;
-    --popover-foreground: 210 40% 98%;
-    
-    --primary: 214 95% 58%;             /* TSI Blue - vibrant professional blue */
-    --primary-foreground: 210 40% 98%;
-    
-    --secondary: 217 24% 16%;           /* Darker blue-gray */
-    --secondary-foreground: 210 40% 98%;
-    
-    --muted: 217 20% 20%;               /* Muted blue-gray */
-    --muted-foreground: 215 16% 65%;    /* Lighter muted text */
-    
-    --accent: 45 93% 65%;               /* Warm accent (straw/gold) */
-    --accent-foreground: 216 25% 8%;    /* Dark text on accent */
-    
+    /* TSI Telecom Neon Theme - Dark Mode */
+    --background: 218 25% 8%;
+    --foreground: 210 20% 98%;
+
+    --card: 220 20% 12%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 20% 98%;
+
+    /* Primary - Neon Blue */
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 20% 98%;
+
+    /* Secondary - Neon Green */
+    --secondary: 142 76% 36%;
+    --secondary-foreground: 210 20% 98%;
+
+    /* Accent - Neon Orange */
+    --accent: 25 95% 53%;
+    --accent-foreground: 210 20% 98%;
+
+    --muted: 220 15% 20%;
+    --muted-foreground: 215 20% 65%;
+
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    
-    --border: 217 20% 18%;              /* Subtle borders */
-    --input: 217 20% 18%;
-    --ring: 214 95% 58%;                /* TSI Blue ring */
-    
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 217 91% 60% / 0.2;
+    --input: 217 91% 60% / 0.3;
+    --ring: 217 91% 60%;
+
     --radius: 0.5rem;
-    
-    /* Sidebar specific colors */
-    --sidebar: 217 24% 10%;             /* Darker sidebar */
-    --sidebar-foreground: 210 30% 85%;
-    --sidebar-primary: 214 95% 58%;     /* TSI Blue */
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217 24% 16%;
-    --sidebar-accent-foreground: 210 30% 85%;
-    --sidebar-border: 217 20% 15%;
+
+    /* Sidebar colors */
+    --sidebar: 220 20% 10%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-border: 217 91% 60% / 0.15;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 210 20% 98%;
+
+    /* Neon glow colors */
+    --neon-blue: 217 91% 60%;
+    --neon-green: 142 76% 36%;
+    --neon-orange: 25 95% 53%;
+    --neon-purple: 271 81% 56%;
+    --neon-cyan: 189 94% 43%;
   }
 
   * {
@@ -52,53 +58,227 @@
   }
 
   body {
-    background-color: hsl(var(--background));
+    background: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Diagonal pattern background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 35px,
+        hsl(var(--primary) / 0.03) 35px,
+        hsl(var(--primary) / 0.03) 70px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Typography */
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    letter-spacing: -0.025em;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
-  code, pre {
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.5);
   }
 }
 
 @layer utilities {
+  /* Neon glow effects */
+  .neon-blue {
+    color: hsl(var(--neon-blue));
+    text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5);
+  }
+
+  .neon-green {
+    color: hsl(var(--neon-green));
+    text-shadow: 0 0 10px hsl(var(--neon-green) / 0.5);
+  }
+
+  .neon-orange {
+    color: hsl(var(--neon-orange));
+    text-shadow: 0 0 10px hsl(var(--neon-orange) / 0.5);
+  }
+
+  .neon-purple {
+    color: hsl(var(--neon-purple));
+    text-shadow: 0 0 10px hsl(var(--neon-purple) / 0.5);
+  }
+
+  .neon-cyan {
+    color: hsl(var(--neon-cyan));
+    text-shadow: 0 0 10px hsl(var(--neon-cyan) / 0.5);
+  }
+
+  /* Neon border effects */
+  .border-neon-blue {
+    border-color: hsl(var(--neon-blue));
+    box-shadow: 0 0 10px hsl(var(--neon-blue) / 0.3);
+  }
+
+  .border-neon-green {
+    border-color: hsl(var(--neon-green));
+    box-shadow: 0 0 10px hsl(var(--neon-green) / 0.3);
+  }
+
+  .border-neon-orange {
+    border-color: hsl(var(--neon-orange));
+    box-shadow: 0 0 10px hsl(var(--neon-orange) / 0.3);
+  }
+
+  /* Glass effect for cards */
+  .glass-card {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Neon card variants */
+  .neon-card-blue {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--neon-blue) / 0.3);
+    box-shadow: 0 0 20px hsl(var(--neon-blue) / 0.1);
+  }
+
+  .neon-card-green {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--neon-green) / 0.3);
+    box-shadow: 0 0 20px hsl(var(--neon-green) / 0.1);
+  }
+
+  .neon-card-orange {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--neon-orange) / 0.3);
+    box-shadow: 0 0 20px hsl(var(--neon-orange) / 0.1);
+  }
+
+  /* Circular progress meter */
+  .circular-meter {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  .circular-meter-bg {
+    fill: none;
+    stroke: hsl(var(--muted));
+    stroke-width: 12;
+  }
+
+  .circular-meter-progress {
+    fill: none;
+    stroke: hsl(var(--neon-orange));
+    stroke-width: 12;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 8px hsl(var(--neon-orange) / 0.6));
+    transition: stroke-dashoffset 0.5s ease;
+  }
+
+  /* Bento Grid Layout */
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    grid-auto-rows: minmax(200px, auto);
+  }
+
+  .bento-item-large {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .bento-item-wide {
+    grid-column: span 2;
+  }
+
+  .bento-item-tall {
+    grid-row: span 2;
+  }
+
+  /* Animated gradient text */
+  .gradient-text {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--neon-blue)),
+      hsl(var(--neon-cyan)),
+      hsl(var(--neon-green))
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% center;
+    }
+    50% {
+      background-position: 100% center;
+    }
+  }
+
+  /* Pulse animation for status indicators */
+  .pulse-neon {
+    animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-neon {
+    0%, 100% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px currentColor);
+    }
+    50% {
+      opacity: 0.7;
+      filter: drop-shadow(0 0 4px currentColor);
+    }
+  }
+
+  /* Container customization */
+  .container {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
   /* Flex utilities with min-width/height fix */
   .flex {
     min-width: 0;
     min-height: 0;
   }
-}
-
-/* Custom scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
-}
-
-/* Selection styling */
-::selection {
-  background: hsl(var(--primary) / 0.3);
-  color: hsl(var(--foreground));
 }

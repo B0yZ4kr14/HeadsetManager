@@ -165,3 +165,30 @@
 - [x] Implementar função de download de arquivo .txt (Blob + download)
 - [x] Incluir timestamp e formatação adequada (header + separadores)
 - [x] Nome do arquivo com data (headset-manager-logs-YYYY-MM-DD.txt)
+
+## Refatoração Completa do Dashboard 🎨
+
+### Logo
+- [x] Integrar nova logo tSitelecom com efeito 3D azul
+- [x] Aplicar efeito neon glow na logo
+- [x] Centralizar logo no sidebar e mobile header
+- [x] Remover fundo transparente e fundir ao tema
+
+### Design e Tema Visual
+- [x] Implementar background com padrão diagonal sutil
+- [x] Criar sistema de cores neon (azul/verde/laranja)
+- [x] Aplicar bordas neon nos cards
+- [x] Tipografia moderna com números grandes destacados
+
+### Componentes Visuais
+- [x] Analisador de espectro com barras coloridas verticais (Chart.js + SpectrumChart)
+- [x] Medidores circulares grandes de performance (CircularMeter)
+- [x] Cards de status com ícones neon (neon-card-* classes)
+- [x] Gráficos de linha para histórico de qualidade (preparado)
+- [x] Painel de controles com botões destacados
+
+### Layout
+- [x] Refatorar Dashboard em grid modular (Bento Grid - lg:col-span-2, lg:row-span-2)
+- [x] Adaptar todas as funcionalidades existentes ao novo design (Home.tsx completo)
+- [x] Garantir responsividade mobile (grid responsivo)
+- [x] Validar coerência visual com o sistema (logo integrada com glow neon)
