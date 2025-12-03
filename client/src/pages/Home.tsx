@@ -34,6 +34,7 @@ export default function Home() {
   const [spectrumData, setSpectrumData] = useState<number[]>(new Array(32).fill(0));
   const [audioLevel, setAudioLevel] = useState(0);
   const [noiseLevel, setNoiseLevel] = useState(0);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'offline'>('all');
   
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -412,6 +413,12 @@ export default function Home() {
               label="NÍVEL"
               color="orange"
               size={180}
+              details={{
+                min: 0,
+                max: 100,
+                average: Math.round(audioLevel * 0.8),
+                unit: 'dB'
+              }}
             />
           </Card>
 
@@ -422,6 +429,12 @@ export default function Home() {
               label="QUALIDADE"
               color="green"
               size={180}
+              details={{
+                min: 0,
+                max: 100,
+                average: Math.round(noiseLevel * 0.9),
+                unit: '%'
+              }}
             />
           </Card>
 
@@ -540,35 +553,72 @@ export default function Home() {
 
           {/* Device Status */}
           <Card className="neon-card-green p-6">
-            <h2 className="text-xl font-bold neon-green mb-4">Status do Dispositivo</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold neon-green">Status do Dispositivo</h2>
+              
+              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                <SelectTrigger className="w-[120px] h-8 border-neon-green/30 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="online">Online</SelectItem>
+                  <SelectItem value="offline">Offline</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Dispositivo Ativo</span>
-                <span className="text-sm font-medium text-foreground">
-                  {devices.find(d => d.deviceId === selectedDeviceId)?.label?.slice(0, 20) || "Nenhum"}
-                </span>
-              </div>
+              {(() => {
+                const filteredDevices = devices.filter(device => {
+                  const isOnline = device.deviceId === selectedDeviceId;
+                  if (statusFilter === 'online') return isOnline;
+                  if (statusFilter === 'offline') return !isOnline;
+                  return true;
+                });
+
+                if (filteredDevices.length === 0) {
+                  return (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p className="text-sm">Nenhum dispositivo {statusFilter === 'all' ? '' : statusFilter}</p>
+                    </div>
+                  );
+                }
+
+                return filteredDevices.map(device => {
+                  const isOnline = device.deviceId === selectedDeviceId;
+                  return (
+                    <div key={device.deviceId} className="p-3 rounded-lg bg-background/50 border border-border space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground truncate flex-1">
+                          {device.label || `Dispositivo ${device.deviceId.slice(0, 8)}`}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "h-2 w-2 rounded-full pulse-neon",
+                            isOnline ? "bg-green-500" : "bg-gray-500"
+                          )} />
+                          <span className="text-xs font-medium">
+                            {isOnline ? "ONLINE" : "OFFLINE"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        ID: {device.deviceId.slice(0, 16)}...
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
               
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    "h-2 w-2 rounded-full pulse-neon",
-                    selectedDeviceId ? "bg-green-500" : "bg-gray-500"
-                  )} />
+              <div className="pt-3 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Sistema</span>
                   <span className="text-sm font-medium">
-                    {selectedDeviceId ? "ONLINE" : "OFFLINE"}
+                    {navigator.userAgent.includes('Windows') ? 'WINDOWS' : 
+                     navigator.userAgent.includes('Linux') ? 'LINUX' : 'OUTRO'}
                   </span>
                 </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Sistema</span>
-                <span className="text-sm font-medium">
-                  {navigator.userAgent.includes('Windows') ? 'WINDOWS' : 
-                   navigator.userAgent.includes('Linux') ? 'LINUX' : 'OUTRO'}
-                </span>
               </div>
             </div>
           </Card>

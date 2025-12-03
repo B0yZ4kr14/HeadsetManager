@@ -192,3 +192,32 @@
 - [x] Adaptar todas as funcionalidades existentes ao novo design (Home.tsx completo)
 - [x] Garantir responsividade mobile (grid responsivo)
 - [x] Validar coerência visual com o sistema (logo integrada com glow neon)
+
+## Verificação e Correção Final 🔍
+
+### Logo (CRÍTICO - IRREVOGÁVEL)
+- [x] Verificar se a logo exibe APENAS a escrita "tSitelecom" (CONFIRMADO - PNG transparente)
+- [x] Remover completamente o fundo da logo (sem caixa branca) (CONFIRMADO - fundo transparente)
+- [x] Aplicar efeito neon azul diretamente na escrita (CONFIRMADO - drop-shadow CSS)
+- [x] Garantir que a logo está fundida ao tema escuro (CONFIRMADO - glow azul neon)
+
+### Elementos Visuais do Dashboard
+- [x] Verificar analisador de espectro com barras coloridas verticais (CONFIRMADO - SpectrumChart + Chart.js)
+- [x] Verificar medidores circulares grandes (laranja) (CONFIRMADO - CircularMeter component)
+- [x] Verificar cards com bordas neon (azul/verde/laranja) (CONFIRMADO - neon-card-* classes)
+- [x] Verificar background com padrão diagonal (CONFIRMADO - diagonal-pattern CSS)
+- [x] Verificar tipografia com números grandes destacados (CONFIRMADO - gradient-text)
+- [x] Verificar layout Bento Grid modular (CONFIRMADO - lg:col-span-2 lg:row-span-2)
+
+## Correções Visuais Urgentes 🚨
+
+### Logo TSI (CRÍTICO - FUNDO BRANCO VISÍVEL)
+- [x] Remover fundo branco da logo usando CSS filters (mix-blend-mode: multiply ou filter: brightness)
+- [x] Adicionar borda neon azul em volta da logo para destaque e legibilidade
+- [x] Testar visibilidade da logo em diferentes resoluções
+- [x] Garantir que a logo se funde ao tema escuro sem caixa branca
+
+### Filtros e Interatividade
+- [x] Adicionar botão de filtro aos cards de status para exibir apenas headsets online ou offline
+- [x] Implementar efeito hover nos medidores circulares com informações detalhadas sobre métricas
+- [x] Adicionar tooltips informativos nos medidores (nível de áudio, qualidade, etc.)
