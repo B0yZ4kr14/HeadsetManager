@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Headphones, Terminal, FileText, Settings, Menu, X, Sun, Moon, HelpCircle, Wrench } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { Headphones, Terminal, FileText, Settings, Menu, X, HelpCircle, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/BrandLogo";
@@ -9,7 +8,6 @@ import BrandLogo from "@/components/BrandLogo";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Headphones },
@@ -25,14 +23,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
         <BrandLogo variant="mobile" />
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-            {isMobileMenuOpen ? <X /> : <Menu />}
-          </Button>
-        </div>
+        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobileMenuOpen ? <X /> : <Menu />}
+        </Button>
       </div>
 
       {/* Sidebar Navigation */}
@@ -62,18 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="p-6 border-t border-sidebar-border space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-xs font-medium text-sidebar-foreground/70">TEMA</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0 text-sidebar-foreground/70 hover:text-sidebar-foreground"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              </Button>
-            </div>
+          <div className="p-6 border-t border-sidebar-border">
             <div className="bg-sidebar-accent/50 p-4 rounded-md border border-sidebar-border text-xs font-mono text-sidebar-foreground/70">
               <div className="flex justify-between mb-2">
                 <span>STATUS</span>

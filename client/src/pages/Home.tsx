@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,6 +30,19 @@ export default function Home() {
   const [isNoiseTestActive, setIsNoiseTestActive] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  
+  const saveRecordingMutation = trpc.headset.tests.create.useMutation({
+    onSuccess: (data) => {
+      toast.success("Gravação salva com sucesso!", {
+        description: "Áudio armazenado no banco de dados.",
+      });
+    },
+    onError: (error) => {
+      toast.error("Erro ao salvar gravação", {
+        description: error.message,
+      });
+    },
+  });
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -196,7 +210,7 @@ export default function Home() {
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(audioBlob);
         const url = URL.createObjectURL(audioBlob);
@@ -205,6 +219,20 @@ export default function Home() {
         
         stream.getTracks().forEach(track => track.stop());
         streamRef.current = null;
+        
+        // Save to database
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Audio = reader.result?.toString().split(',')[1];
+          if (base64Audio) {
+            saveRecordingMutation.mutate({
+              testType: "recording",
+              duration: recordingTime,
+              audioBlob: base64Audio,
+            });
+          }
+        };
+        reader.readAsDataURL(audioBlob);
         
         // Auto-play after recording
         const audio = new Audio(url);

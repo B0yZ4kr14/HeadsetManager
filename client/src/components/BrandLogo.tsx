@@ -2,41 +2,38 @@ import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
   className?: string;
-  showText?: boolean;
   variant?: "default" | "mobile" | "sidebar";
 }
 
 export default function BrandLogo({ 
   className, 
-  showText = true,
   variant = "default" 
 }: BrandLogoProps) {
+  const logoHeight = variant === "mobile" ? "h-10" : "h-14";
+  
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <img 
-        src="/logo.png" 
+        src="/tsi-logo.png" 
         alt="TSI Telecom" 
         className={cn(
           "object-contain transition-all duration-200",
-          variant === "mobile" ? "h-8 w-auto" : "h-10 w-auto"
+          logoHeight,
+          "w-auto"
         )} 
+        style={{ 
+          filter: 'drop-shadow(0 2px 12px rgba(59, 130, 246, 0.4))' 
+        }}
       />
       
-      {showText && (
-        <div className="flex flex-col justify-center">
-          <h1 className={cn(
-            "font-bold tracking-tight leading-none text-foreground",
-            variant === "mobile" ? "text-lg" : "text-lg"
-          )}>
-            TSI Telecom
-          </h1>
-          {variant === "sidebar" && (
-            <span className="text-[10px] font-medium text-primary uppercase tracking-wider mt-1">
-              Headset Manager
-            </span>
-          )}
-        </div>
-      )}
+      <div className="flex flex-col justify-center">
+        <span className={cn(
+          "font-semibold text-primary uppercase tracking-widest leading-none",
+          variant === "mobile" ? "text-[10px]" : "text-xs"
+        )}>
+          Headset Manager
+        </span>
+      </div>
     </div>
   );
 }

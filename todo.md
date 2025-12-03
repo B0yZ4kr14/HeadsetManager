@@ -36,3 +36,13 @@
 - [x] Interface de chat com IA no Dashboard (AIAssistant)
 - [x] Painel de logs ao vivo com WebSocket (LiveLogsPanel)
 - [x] 8 testes unitários passando (incluindo testes de IA)
+
+## Refatoração Solicitada 🎨
+
+- [x] Logo com fundo transparente integrada ao tema (drop-shadow azul)
+- [x] Remover texto "TSI Telecom" redundante (apenas logo + subtitle)
+- [x] Fixar tema dark único (removido ThemeProvider e botões de toggle)
+- [x] Paleta azul profissional alinhada com a logo (TSI Blue #3B82F6)
+- [x] Persistir gravações de áudio no banco de dados (auto-save após gravação)
+- [x] Otimizar código e remover redundâncias (CSS limpo, imports organizados)
+- [x] Melhorias UX profissionais (spacing, hierarquia, micro-interações)
