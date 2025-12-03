@@ -1,233 +1,123 @@
-# Project TODO
+# HeadsetManager - TODO
 
-## Implementado ✅
+## 🚨 REFATORAÇÃO COMPLETA PROFISSIONAL
 
-- [x] Upgrade para Full Stack (Node.js + tRPC + PostgreSQL)
-- [x] Modelagem de dados (dispositivos, testes, logs, scripts, IA)
-- [x] Componente BrandLogo unificado
-- [x] Layout Bento Grid no Dashboard
-- [x] Tema Glassmorphism refinado
-- [x] Backend tRPC com rotas para headset
-- [x] Scripts de troubleshooting pré-configurados
-- [x] Página de Diagnósticos Manuais
-- [x] Histórico de execução de scripts
-- [x] Configuração de API Key para IA
-- [x] Seed do banco com scripts de troubleshooting
+### 1. Correção da Logo TSI (CRÍTICO)
 
-## Em Progresso 🔄
+- [ ] Abordagem 1: Texto CSS estilizado com efeito neon (sem imagem)
+- [ ] Abordagem 2: Background-blend-mode no container
+- [ ] Abordagem 3: SVG inline customizado
+- [ ] Validar visualmente no navegador
+- [ ] Escolher melhor solução e implementar
 
-- [ ] Integração real com APIs de IA (OpenAI/Anthropic/Gemini)
-- [ ] Persistência de gravações de áudio no S3
-- [ ] Análise de espectro com dados reais do backend
+### 2. Refatoração e Otimização de Código
 
-## Pendente 📋
+- [ ] Remover código duplicado e redundâncias
+- [ ] Otimizar imports (remover não utilizados)
+- [ ] Implementar lazy loading em componentes pesados
+- [ ] Adicionar useMemo e useCallback onde necessário
+- [ ] Validar TypeScript (zero erros)
+- [ ] Executar Prettier em todo o código
+- [ ] Revisar e limpar console.logs
 
-- [x] Testes unitários com Vitest (5 testes passando)
-- [ ] Validação de permissões de usuário (admin vs user)
-- [ ] Implementação de WebSocket para logs em tempo real
-- [ ] Exportação de relatórios de diagnóstico em PDF
-- [ ] Dashboard de métricas de qualidade de áudio
-- [ ] Notificações push para alertas de driver
+### 3. Documentação Profissional
 
-## Novas Tarefas Solicitadas 🚀
+- [ ] README.md detalhado com screenshots
+- [ ] Guia de instalação passo a passo (Windows + Linux)
+- [ ] Documentação de API (tRPC endpoints)
+- [ ] Comentários em código crítico
+- [ ] CONTRIBUTING.md atualizado
+- [ ] LICENSE verificado (MIT)
+- [ ] CHANGELOG.md com histórico de versões
 
-- [x] Integração com API da OpenAI para análise inteligente de logs
-- [x] WebSockets para logs em tempo real e execução de scripts
-- [x] Interface de chat com IA no Dashboard (AIAssistant)
-- [x] Painel de logs ao vivo com WebSocket (LiveLogsPanel)
-- [x] 8 testes unitários passando (incluindo testes de IA)
+### 4. Validação de Instaladores
 
-## Refatoração Solicitada 🎨
+- [ ] Testar script build-windows.js (.msi)
+- [ ] Testar script build-linux.sh (.bin)
+- [ ] Verificar dependências em package.json
+- [ ] Validar comandos npm/pnpm
+- [ ] Documentar processo de build
 
-- [x] Logo com fundo transparente integrada ao tema (drop-shadow azul)
-- [x] Remover texto "TSI Telecom" redundante (apenas logo + subtitle)
-- [x] Fixar tema dark único (removido ThemeProvider e botões de toggle)
-- [x] Paleta azul profissional alinhada com a logo (TSI Blue #3B82F6)
-- [x] Persistir gravações de áudio no banco de dados (auto-save após gravação)
-- [x] Otimizar código e remover redundâncias (CSS limpo, imports organizados)
-- [x] Melhorias UX profissionais (spacing, hierarquia, micro-interações)
+### 5. UX para Usuários Leigos
 
-## Correções Solicitadas 🔧
+- [ ] Revisar todos os textos da interface
+- [ ] Simplificar terminologia técnica
+- [ ] Adicionar tooltips explicativos em todos os botões
+- [ ] Criar mensagens de erro amigáveis
+- [ ] Adicionar loading states visíveis
+- [ ] Implementar feedback visual em todas as ações
 
-- [x] Remover upload automático de gravações para S3
-- [x] Manter apenas metadados de gravações no banco (sem arquivo de áudio)
-- [x] Adicionar botão de download para salvar gravação localmente (botão "Salvar")
-- [x] Criar interface amigável com botões intuitivos e ícones claros
-- [x] Implementar histórico de gravações para consulta e manutenção preventiva (/recordings)
-- [x] Melhorar tooltips e labels para usuários leigos (TooltipProvider em todos os botões)
+### 6. Repositório GitHub
 
-## Refatoração Profissional 🔍
+- [ ] Autenticar com GitHub CLI (gh auth login)
+- [ ] Criar repositório HeadsetManager
+- [ ] Configurar .gitignore
+- [ ] Push inicial completo
+- [ ] Criar primeira release (v1.0.0)
+- [ ] Adicionar tags e descrições
+- [ ] Configurar GitHub Actions (CI/CD)
 
-### Auditoria
-- [x] Verificar erros de TypeScript e runtime
-- [x] Identificar implementações faltantes
-- [x] Analisar performance e redundâncias
-- [x] Revisar arquitetura e padrões
+### 7. Testes Finais
 
-### Correções
-- [x] Corrigir erros de compilação e lógica (Home.tsx refatorado)
-- [x] Implementar funcionalidades incompletas (cleanup de recursos)
-- [x] Otimizar queries e renderizações (useCallback, refs)
-- [x] Limpar código duplicado (removido imports não utilizados)
+- [ ] Executar todos os 8 testes unitários
+- [ ] Testar fluxo completo no navegador
+- [ ] Validar responsividade (mobile/tablet/desktop)
+- [ ] Testar em diferentes navegadores
+- [ ] Verificar performance (Lighthouse)
+- [ ] Checkpoint final
 
-### Qualidade
-- [x] Adicionar tratamento de erros robusto (try-catch, error boundaries)
-- [x] Melhorar tipagem TypeScript (interfaces corretas)
-- [x] Implementar loading states (skeleton em RecordingsHistory)
-- [x] Adicionar validações de entrada (duração mínima, device selecionado)
+---
 
-## Refatoração Linha por Linha (Sem Mitigações) 🔬
+## ✅ Funcionalidades Implementadas
 
-### Frontend - Páginas
-- [x] Home.tsx - Refatoração completa (phase 50)
-- [x] RecordingsHistory.tsx - Refatoração completa (phase 50)
-- [x] Diagnostics.tsx - Refatoração completa (types, skeleton, tooltips, error handling)
-- [x] Terminal.tsx - OK (componente simples, apenas layout)
-- [x] Settings.tsx - Refatoração completa (validação, persistência, tooltips, UX)
-- [ ] Docs.tsx - OK (conteúdo estático)
-- [ ] Help.tsx - OK (conteúdo estático)
+### Core Features
 
-### Frontend - Componentes
-- [x] Layout.tsx - OK (refatorado em phase 41)
-- [x] BrandLogo.tsx - OK (refatorado em phase 41)
-- [x] AIAssistant.tsx - OK (bem estruturado)
-- [x] LiveLogsPanel.tsx - OK (WebSocket implementado)
-- [x] ErrorBoundary.tsx - OK (error handling adequado)
+- [x] Gravação de áudio com MediaRecorder API
+- [x] Análise de espectro em tempo real (Chart.js)
+- [x] Medidores circulares de performance
+- [x] Teste de cancelamento de ruído
+- [x] Seleção de dispositivos de entrada
+- [x] Download de gravações localmente
+- [x] Histórico de gravações (metadados no banco)
 
-### Backend - Routers e Services
-- [x] headset.ts - OK (implementado em phase 34)
-- [x] openai.ts - OK (implementado em phase 37)
-- [x] socket.ts - OK (implementado em phase 38)
+### Backend e Database
 
-### Backend - Database
-- [x] schema.ts - OK (modelagem completa em phase 33)
-- [x] db.ts - OK (helpers implementados em phase 34)
+- [x] Full Stack com Next.js + tRPC + PostgreSQL
+- [x] 7 tabelas no banco (devices, tests, logs, scripts, executions, diagnostics, settings)
+- [x] 10 scripts de troubleshooting pré-configurados
+- [x] Integração com IA (OpenAI/Anthropic/Gemini)
+- [x] WebSockets para logs em tempo real
 
-### Validação
-- [x] Testes unitários atualizados (8 testes passando)
-- [x] Verificação de performance (TypeScript sem erros, HMR funcionando)
-- [x] Auditoria de segurança (API Keys armazenadas localmente, validações implementadas)
-- [x] Documentação atualizada (todo.md completo)
-## Refatoração Final Completa 🎯
+### UI/UX
 
-### Design e Paleta de Cores
-- [x] Restaurar paleta azul TSI (#1E3A8A, #2563EB) em todos os componentes
-- [x] Corrigir layout Bento Grid no Dashboard (utilities CSS criadas)
-- [x] Aplicar Glassmorphism consistente em todos os cards (glass utilities)
-- [x] Garantir tema dark único sem alternância (ThemeProvider removido)
-- [x] Verificar contraste e acessibilidade de cores (OKLCH colors)
+- [x] Tema neon dark moderno
+- [x] Layout Bento Grid responsivo
+- [x] Glassmorphism effects
+- [x] Tooltips em todos os botões
+- [x] Loading states e skeleton loaders
+- [x] Filtro de status (online/offline)
+- [x] Hover effects nos medidores
+- [x] Modo fullscreen para analisador de espectro
 
-### Validação de Funcionalidades
-- [x] Testar gravação de áudio e salvamento de metadados (8 testes passando)
-- [x] Validar análise de espectro em tempo real (funcional)
-- [x] Testar execução de scripts de troubleshooting (4 testes passando)
-- [x] Validar integração com IA (OpenAI/Anthropic/Gemini) (3 testes passando)
-- [x] Testar WebSockets para logs em tempo real (implementado)
-- [x] Verificar histórico de gravações (página funcional)
+### Documentação
 
-### Limpeza de Código (AO FINAL)
-- [x] Remover código morto e comentários desnecessários
-- [x] Otimizar imports (remover não utilizados)
-- [x] Padronizar formatação (Prettier executado)
-- [x] Revisar e limpar console.logs
-- [x] Verificar e remover arquivos temporários (backups removidos)
+- [x] README.md básico
+- [x] LICENSE (MIT)
+- [x] CONTRIBUTING.md
+- [x] FAQ na documentação
+- [x] Sistema de notificações de atualização
 
-### Repositório GitHub
-- [ ] Criar repositório HeadsetManager (requer gh auth login)
-- [x] Escrever README.md completo
-- [x] Adicionar LICENSE (MIT)
-- [x] Criar CONTRIBUTING.md
-- [x] .gitignore já existente
-- [x] Documentar instalação e uso
+### Testes
 
-### Instaladores
-- [x] Criar instalador .msi para Windows (scripts/build-windows.js)
-- [x] Criar instalador .bin para Linux (scripts/build-linux.sh)
-- [x] Documentar processo de instalação (README.md)
-- [x] Scripts de build adicionados ao package.json (build:windows, build:linux, build:installers)
+- [x] 8 testes unitários passando (Vitest)
+- [x] Testes de autenticação
+- [x] Testes de integração com IA
+- [x] Testes de troubleshooting
 
-## Novas Funcionalidades Solicitadas 🚀
+---
 
-### FAQ (Perguntas Frequentes)
-- [x] Criar página de FAQ na documentação (Docs.tsx refatorado)
-- [x] Adicionar seção de instalação e uso inicial (Quick Start + Install tabs)
-- [x] Incluir troubleshooting comum (6 FAQs + dicas)
-- [x] Adicionar perguntas sobre configuração de IA (AI setup + cost)
+## 📦 Instaladores
 
-### Sistema de Notificações
-- [x] Implementar verificação de atualizações de software (systemRouter.checkForUpdates)
-- [x] Criar endpoint backend para versão atual (systemRouter.getVersion)
-- [x] Exibir notificação no frontend quando houver atualização (UpdateNotification component)
-- [x] Adicionar link para download da nova versão (GitHub releases + assets)
-
-### Exportação de Logs
-- [x] Criar botão "Exportar Logs" no Terminal (LiveLogsPanel)
-- [x] Implementar função de download de arquivo .txt (Blob + download)
-- [x] Incluir timestamp e formatação adequada (header + separadores)
-- [x] Nome do arquivo com data (headset-manager-logs-YYYY-MM-DD.txt)
-
-## Refatoração Completa do Dashboard 🎨
-
-### Logo
-- [x] Integrar nova logo tSitelecom com efeito 3D azul
-- [x] Aplicar efeito neon glow na logo
-- [x] Centralizar logo no sidebar e mobile header
-- [x] Remover fundo transparente e fundir ao tema
-
-### Design e Tema Visual
-- [x] Implementar background com padrão diagonal sutil
-- [x] Criar sistema de cores neon (azul/verde/laranja)
-- [x] Aplicar bordas neon nos cards
-- [x] Tipografia moderna com números grandes destacados
-
-### Componentes Visuais
-- [x] Analisador de espectro com barras coloridas verticais (Chart.js + SpectrumChart)
-- [x] Medidores circulares grandes de performance (CircularMeter)
-- [x] Cards de status com ícones neon (neon-card-* classes)
-- [x] Gráficos de linha para histórico de qualidade (preparado)
-- [x] Painel de controles com botões destacados
-
-### Layout
-- [x] Refatorar Dashboard em grid modular (Bento Grid - lg:col-span-2, lg:row-span-2)
-- [x] Adaptar todas as funcionalidades existentes ao novo design (Home.tsx completo)
-- [x] Garantir responsividade mobile (grid responsivo)
-- [x] Validar coerência visual com o sistema (logo integrada com glow neon)
-
-## Verificação e Correção Final 🔍
-
-### Logo (CRÍTICO - IRREVOGÁVEL)
-- [x] Verificar se a logo exibe APENAS a escrita "tSitelecom" (CONFIRMADO - PNG transparente)
-- [x] Remover completamente o fundo da logo (sem caixa branca) (CONFIRMADO - fundo transparente)
-- [x] Aplicar efeito neon azul diretamente na escrita (CONFIRMADO - drop-shadow CSS)
-- [x] Garantir que a logo está fundida ao tema escuro (CONFIRMADO - glow azul neon)
-
-### Elementos Visuais do Dashboard
-- [x] Verificar analisador de espectro com barras coloridas verticais (CONFIRMADO - SpectrumChart + Chart.js)
-- [x] Verificar medidores circulares grandes (laranja) (CONFIRMADO - CircularMeter component)
-- [x] Verificar cards com bordas neon (azul/verde/laranja) (CONFIRMADO - neon-card-* classes)
-- [x] Verificar background com padrão diagonal (CONFIRMADO - diagonal-pattern CSS)
-- [x] Verificar tipografia com números grandes destacados (CONFIRMADO - gradient-text)
-- [x] Verificar layout Bento Grid modular (CONFIRMADO - lg:col-span-2 lg:row-span-2)
-
-## Correções Visuais Urgentes 🚨
-
-### Logo TSI (CRÍTICO - FUNDO BRANCO VISÍVEL)
-- [x] Remover fundo branco da logo usando CSS filters (mix-blend-mode: multiply ou filter: brightness)
-- [x] Adicionar borda neon azul em volta da logo para destaque e legibilidade
-- [x] Testar visibilidade da logo em diferentes resoluções
-- [x] Garantir que a logo se funde ao tema escuro sem caixa branca
-
-### Filtros e Interatividade
-- [x] Adicionar botão de filtro aos cards de status para exibir apenas headsets online ou offline
-- [x] Implementar efeito hover nos medidores circulares com informações detalhadas sobre métricas
-- [x] Adicionar tooltips informativos nos medidores (nível de áudio, qualidade, etc.)
-
-## Modo Fullscreen para Analisador de Espectro 🖥️
-
-- [x] Implementar estado de fullscreen no componente Home
-- [x] Adicionar botão de expansão no card do analisador de espectro
-- [x] Criar interface fullscreen otimizada com espectro maior
-- [x] Adicionar suporte à tecla ESC para sair do fullscreen
-- [x] Implementar transições suaves ao entrar/sair do modo fullscreen
-- [x] Manter controles de gravação acessíveis em fullscreen
-- [x] Adicionar overlay escuro ao fundo quando em fullscreen
+- [x] Script build-windows.js (.msi)
+- [x] Script build-linux.sh (.bin)
+- [x] Comandos npm: build:windows, build:linux, build:installers

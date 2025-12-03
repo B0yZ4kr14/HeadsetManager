@@ -92,7 +92,8 @@ export const systemRouter = router({
       const latestRelease = await response.json();
       const latestVersion = latestRelease.tag_name.replace(/^v/, "");
 
-      const isUpdateAvailable = compareVersions(latestVersion, CURRENT_VERSION) > 0;
+      const isUpdateAvailable =
+        compareVersions(latestVersion, CURRENT_VERSION) > 0;
 
       return {
         currentVersion: CURRENT_VERSION,

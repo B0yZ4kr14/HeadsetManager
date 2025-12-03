@@ -1,29 +1,45 @@
 import { useState, useCallback, useMemo } from "react";
 import { useSocketEvent } from "@/hooks/useSocket";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { 
-  Terminal, 
-  Play, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Terminal,
+  Play,
+  CheckCircle2,
+  XCircle,
+  Clock,
   AlertTriangle,
   Wrench,
   Cpu,
   Volume2,
   Network,
   Sparkles,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
 // Type definitions
@@ -78,49 +94,54 @@ const CATEGORIES = [
 export default function DiagnosticsPage() {
   // State
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [executingScriptId, setExecutingScriptId] = useState<number | null>(null);
+  const [executingScriptId, setExecutingScriptId] = useState<number | null>(
+    null
+  );
 
   // Queries
-  const { 
-    data: scripts, 
+  const {
+    data: scripts,
     isLoading: scriptsLoading,
     error: scriptsError,
-    refetch: refetchScripts
+    refetch: refetchScripts,
   } = trpc.headset.troubleshooting.listScripts.useQuery({
     category: selectedCategory === "all" ? undefined : selectedCategory,
   });
 
-  const { 
-    data: executions, 
+  const {
+    data: executions,
     isLoading: executionsLoading,
-    refetch: refetchExecutions 
+    refetch: refetchExecutions,
   } = trpc.headset.troubleshooting.listExecutions.useQuery({
     limit: 10,
   });
 
   // Mutations
-  const executeScriptMutation = trpc.headset.troubleshooting.executeScript.useMutation({
-    onSuccess: (data) => {
-      toast.success("Script executado com sucesso!", {
-        description: `Tempo de execução: ${data.executionTime}ms`,
-      });
-      refetchExecutions();
-      setExecutingScriptId(null);
-    },
-    onError: (error) => {
-      toast.error("Erro ao executar script", {
-        description: error.message,
-      });
-      setExecutingScriptId(null);
-    },
-  });
+  const executeScriptMutation =
+    trpc.headset.troubleshooting.executeScript.useMutation({
+      onSuccess: data => {
+        toast.success("Script executado com sucesso!", {
+          description: `Tempo de execução: ${data.executionTime}ms`,
+        });
+        refetchExecutions();
+        setExecutingScriptId(null);
+      },
+      onError: error => {
+        toast.error("Erro ao executar script", {
+          description: error.message,
+        });
+        setExecutingScriptId(null);
+      },
+    });
 
   // WebSocket event handler
   const handleScriptExecution = useCallback(
     (data: SocketExecutionData) => {
       if (data.status === "success") {
         toast.success(`${data.scriptName} concluído!`, {
-          description: data.executionTime ? `Tempo: ${data.executionTime}ms` : undefined,
+          description: data.executionTime
+            ? `Tempo: ${data.executionTime}ms`
+            : undefined,
         });
       } else if (data.status === "failed") {
         toast.error(`${data.scriptName} falhou`, {
@@ -135,16 +156,20 @@ export default function DiagnosticsPage() {
   useSocketEvent("script:execution", handleScriptExecution);
 
   // Event handlers
-  const handleExecuteScript = useCallback((scriptId: number, requiresRoot: boolean) => {
-    if (requiresRoot) {
-      toast.warning("Este script requer permissões de administrador", {
-        description: "Certifique-se de que você tem as permissões necessárias.",
-      });
-    }
+  const handleExecuteScript = useCallback(
+    (scriptId: number, requiresRoot: boolean) => {
+      if (requiresRoot) {
+        toast.warning("Este script requer permissões de administrador", {
+          description:
+            "Certifique-se de que você tem as permissões necessárias.",
+        });
+      }
 
-    setExecutingScriptId(scriptId);
-    executeScriptMutation.mutate({ scriptId });
-  }, [executeScriptMutation]);
+      setExecutingScriptId(scriptId);
+      executeScriptMutation.mutate({ scriptId });
+    },
+    [executeScriptMutation]
+  );
 
   const handleRefreshScripts = useCallback(() => {
     refetchScripts();
@@ -159,8 +184,11 @@ export default function DiagnosticsPage() {
   // Render helpers
   const renderScriptSkeleton = () => (
     <div className="space-y-3">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="p-4 rounded-lg border border-white/10 bg-background/50">
+      {[1, 2, 3].map(i => (
+        <div
+          key={i}
+          className="p-4 rounded-lg border border-white/10 bg-background/50"
+        >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-2">
               <Skeleton className="h-5 w-48" />
@@ -204,19 +232,28 @@ export default function DiagnosticsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Diagnósticos Manuais</h1>
-          <p className="text-muted-foreground mt-1">Execute scripts de troubleshooting para resolver problemas comuns.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Diagnósticos Manuais
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Execute scripts de troubleshooting para resolver problemas comuns.
+          </p>
         </div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                onClick={handleRefreshScripts} 
-                variant="outline" 
+              <Button
+                onClick={handleRefreshScripts}
+                variant="outline"
                 disabled={scriptsLoading}
                 className="backdrop-blur-sm bg-background/50"
               >
-                <RefreshCw className={cn("mr-2 h-4 w-4", scriptsLoading && "animate-spin")} />
+                <RefreshCw
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    scriptsLoading && "animate-spin"
+                  )}
+                />
                 Atualizar
               </Button>
             </TooltipTrigger>
@@ -238,15 +275,19 @@ export default function DiagnosticsPage() {
         </div>
       )}
 
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="space-y-6">
+      <Tabs
+        value={selectedCategory}
+        onValueChange={setSelectedCategory}
+        className="space-y-6"
+      >
         {/* Category Tabs */}
         <TabsList className="grid w-full grid-cols-5 bg-card/50 backdrop-blur-md border border-white/10">
-          {CATEGORIES.map((cat) => {
+          {CATEGORIES.map(cat => {
             const Icon = cat.icon;
             return (
-              <TabsTrigger 
-                key={cat.id} 
-                value={cat.id} 
+              <TabsTrigger
+                key={cat.id}
+                value={cat.id}
                 className="data-[state=active]:bg-primary/20 transition-colors"
               >
                 <Icon className="h-4 w-4 mr-2" />
@@ -266,8 +307,8 @@ export default function DiagnosticsPage() {
                   Scripts Disponíveis
                 </CardTitle>
                 <CardDescription>
-                  {selectedCategory === "all" 
-                    ? "Todos os scripts de diagnóstico" 
+                  {selectedCategory === "all"
+                    ? "Todos os scripts de diagnóstico"
                     : `Scripts da categoria: ${selectedCategoryLabel}`}
                 </CardDescription>
               </CardHeader>
@@ -276,8 +317,11 @@ export default function DiagnosticsPage() {
                   renderScriptSkeleton()
                 ) : scripts && scripts.length > 0 ? (
                   <div className="space-y-3">
-                    {scripts.map((script) => {
-                      const Icon = CATEGORY_ICONS[script.category as keyof typeof CATEGORY_ICONS] || Terminal;
+                    {scripts.map(script => {
+                      const Icon =
+                        CATEGORY_ICONS[
+                          script.category as keyof typeof CATEGORY_ICONS
+                        ] || Terminal;
                       const isExecuting = executingScriptId === script.id;
 
                       return (
@@ -289,20 +333,36 @@ export default function DiagnosticsPage() {
                             <div className="flex-1 space-y-2">
                               <div className="flex items-center gap-2 flex-wrap">
                                 <Icon className="h-4 w-4 text-muted-foreground" />
-                                <h4 className="font-semibold text-foreground">{script.name}</h4>
+                                <h4 className="font-semibold text-foreground">
+                                  {script.name}
+                                </h4>
                                 {script.requiresRoot && (
-                                  <Badge variant="outline" className="text-[10px] border-yellow-500/30 text-yellow-500">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[10px] border-yellow-500/30 text-yellow-500"
+                                  >
                                     <AlertTriangle className="h-3 w-3 mr-1" />
                                     ROOT
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-muted-foreground">{script.description}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {script.description}
+                              </p>
                               <div className="flex items-center gap-2 flex-wrap">
-                                <Badge className={CATEGORY_COLORS[script.category as keyof typeof CATEGORY_COLORS]}>
+                                <Badge
+                                  className={
+                                    CATEGORY_COLORS[
+                                      script.category as keyof typeof CATEGORY_COLORS
+                                    ]
+                                  }
+                                >
                                   {script.category}
                                 </Badge>
-                                <Badge variant="outline" className="text-[10px]">
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px]"
+                                >
                                   {script.platform}
                                 </Badge>
                               </div>
@@ -312,8 +372,16 @@ export default function DiagnosticsPage() {
                                 <TooltipTrigger asChild>
                                   <Button
                                     size="sm"
-                                    onClick={() => handleExecuteScript(script.id, script.requiresRoot ?? false)}
-                                    disabled={isExecuting || executeScriptMutation.isPending}
+                                    onClick={() =>
+                                      handleExecuteScript(
+                                        script.id,
+                                        script.requiresRoot ?? false
+                                      )
+                                    }
+                                    disabled={
+                                      isExecuting ||
+                                      executeScriptMutation.isPending
+                                    }
                                     className="shrink-0"
                                   >
                                     {isExecuting ? (
@@ -362,7 +430,7 @@ export default function DiagnosticsPage() {
                 <ScrollArea className="h-[500px] pr-4">
                   {executionsLoading ? (
                     <div className="space-y-3">
-                      {[1, 2, 3].map((i) => (
+                      {[1, 2, 3].map(i => (
                         <div key={i} className="space-y-2">
                           <Skeleton className="h-12 w-full" />
                         </div>
@@ -370,9 +438,12 @@ export default function DiagnosticsPage() {
                     </div>
                   ) : executions && executions.length > 0 ? (
                     <div className="space-y-3">
-                      {executions.map((exec) => (
+                      {executions.map(exec => (
                         <Accordion key={exec.id} type="single" collapsible>
-                          <AccordionItem value={`exec-${exec.id}`} className="border-white/5">
+                          <AccordionItem
+                            value={`exec-${exec.id}`}
+                            className="border-white/5"
+                          >
                             <AccordionTrigger className="text-sm hover:no-underline py-3">
                               <div className="flex items-center gap-2 text-left">
                                 {renderExecutionStatus(exec.status)}
@@ -384,7 +455,9 @@ export default function DiagnosticsPage() {
                             <AccordionContent className="text-xs space-y-2">
                               {exec.output && (
                                 <div className="bg-black/50 p-2 rounded font-mono text-[10px] text-green-400 overflow-x-auto max-h-32 overflow-y-auto">
-                                  <pre className="whitespace-pre-wrap break-words">{exec.output}</pre>
+                                  <pre className="whitespace-pre-wrap break-words">
+                                    {exec.output}
+                                  </pre>
                                 </div>
                               )}
                               {exec.errorMessage && (
@@ -428,9 +501,16 @@ export default function DiagnosticsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-3">
-            Configure sua API Key nas Configurações para ativar o assistente de diagnóstico inteligente com análise automática de logs e sugestões de correção.
+            Configure sua API Key nas Configurações para ativar o assistente de
+            diagnóstico inteligente com análise automática de logs e sugestões
+            de correção.
           </p>
-          <Button variant="outline" size="sm" className="border-primary/20 hover:bg-primary/10" asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-primary/20 hover:bg-primary/10"
+            asChild
+          >
             <a href="/settings">Configurar API Key</a>
           </Button>
         </CardContent>

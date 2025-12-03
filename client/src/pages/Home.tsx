@@ -3,10 +3,32 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { Mic, Play, Square, Volume2, RefreshCw, AlertCircle, Save, Activity, Maximize, Minimize } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Mic,
+  Play,
+  Square,
+  Volume2,
+  RefreshCw,
+  AlertCircle,
+  Save,
+  Activity,
+  Maximize,
+  Minimize,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { CircularMeter } from "@/components/CircularMeter";
 import { SpectrumChart } from "@/components/SpectrumChart";
 import { cn } from "@/lib/utils";
@@ -31,12 +53,16 @@ export default function Home() {
   const [isNoiseTestActive, setIsNoiseTestActive] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [spectrumData, setSpectrumData] = useState<number[]>(new Array(32).fill(0));
+  const [spectrumData, setSpectrumData] = useState<number[]>(
+    new Array(32).fill(0)
+  );
   const [audioLevel, setAudioLevel] = useState(0);
   const [noiseLevel, setNoiseLevel] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'offline'>('all');
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "online" | "offline"
+  >("all");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
+
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -55,7 +81,7 @@ export default function Home() {
         description: "Metadados armazenados no banco de dados.",
       });
     },
-    onError: (error) => {
+    onError: error => {
       toast.error("Erro ao salvar gravação", {
         description: error.message,
       });
@@ -72,17 +98,17 @@ export default function Home() {
 
   const cleanupAudioResources = useCallback(() => {
     stopVisualization();
-    
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
       audioContextRef.current.close().catch(console.error);
       audioContextRef.current = null;
     }
-    
+
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
@@ -103,21 +129,24 @@ export default function Home() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(track => track.stop());
-      
+
       const deviceList = await navigator.mediaDevices.enumerateDevices();
-      const audioInputs = deviceList.filter(device => device.kind === 'audioinput');
+      const audioInputs = deviceList.filter(
+        device => device.kind === "audioinput"
+      );
       setDevices(audioInputs as AudioDevice[]);
-      
+
       if (audioInputs.length > 0 && !selectedDeviceId) {
         setSelectedDeviceId(audioInputs[0].deviceId);
       }
-      
+
       setPermissionDenied(false);
     } catch (error) {
-      console.error('Error getting devices:', error);
+      console.error("Error getting devices:", error);
       setPermissionDenied(true);
       toast.error("Permissão negada", {
-        description: "Por favor, permita o acesso ao microfone para usar os recursos de teste.",
+        description:
+          "Por favor, permita o acesso ao microfone para usar os recursos de teste.",
       });
     }
   };
@@ -166,23 +195,23 @@ export default function Home() {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { deviceId: selectedDeviceId }
+        audio: { deviceId: selectedDeviceId },
       });
-      
+
       streamRef.current = stream;
 
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
-      mediaRecorder.ondataavailable = (event) => {
+      mediaRecorder.ondataavailable = event => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -210,7 +239,7 @@ export default function Home() {
 
       toast.success("Gravação iniciada");
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error("Error starting recording:", error);
       toast.error("Erro ao iniciar gravação");
     }
   };
@@ -220,7 +249,7 @@ export default function Home() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      
+
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
         timerIntervalRef.current = null;
@@ -238,7 +267,14 @@ export default function Home() {
         saveRecordingMutation.mutate({
           testType: "recording" as const,
           duration: recordingTime,
-          quality: audioLevel > 70 ? "excellent" : audioLevel > 50 ? "good" : audioLevel > 30 ? "fair" : "poor",
+          quality:
+            audioLevel > 70
+              ? "excellent"
+              : audioLevel > 50
+                ? "good"
+                : audioLevel > 30
+                  ? "fair"
+                  : "poor",
           noiseLevel: Math.round(noiseLevel),
           spectrumData: JSON.stringify(spectrumData),
         });
@@ -262,7 +298,7 @@ export default function Home() {
   const saveRecording = () => {
     if (audioBlob) {
       const url = URL.createObjectURL(audioBlob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `headset-recording-${Date.now()}.webm`;
       document.body.appendChild(a);
@@ -286,7 +322,11 @@ export default function Home() {
 
       // Create white noise
       const bufferSize = audioContext.sampleRate * 2;
-      const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+      const buffer = audioContext.createBuffer(
+        1,
+        bufferSize,
+        audioContext.sampleRate
+      );
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
         data[i] = Math.random() * 2 - 1;
@@ -297,12 +337,12 @@ export default function Home() {
       source.loop = true;
       source.connect(audioContext.destination);
       source.start();
-      
+
       noiseSourceRef.current = source;
       setIsNoiseTestActive(true);
       toast.success("Teste de ruído iniciado");
     } catch (error) {
-      console.error('Error starting noise test:', error);
+      console.error("Error starting noise test:", error);
       toast.error("Erro ao iniciar teste de ruído");
     }
   };
@@ -337,20 +377,20 @@ export default function Home() {
   // ESC key listener for fullscreen
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFullscreen) {
+      if (e.key === "Escape" && isFullscreen) {
         setIsFullscreen(false);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFullscreen]);
 
   // Format time
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -361,11 +401,15 @@ export default function Home() {
           <div className="flex items-center justify-between p-6 border-b border-border">
             <div className="flex items-center gap-3">
               <Activity className="h-6 w-6 neon-blue" />
-              <h2 className="text-2xl font-bold neon-blue">Análise de Espectro - Modo Tela Cheia</h2>
+              <h2 className="text-2xl font-bold neon-blue">
+                Análise de Espectro - Modo Tela Cheia
+              </h2>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">Pressione ESC para sair</span>
+              <span className="text-sm text-muted-foreground">
+                Pressione ESC para sair
+              </span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -385,12 +429,17 @@ export default function Home() {
           <div className="flex-1 flex items-center justify-center p-8">
             {isRecording ? (
               <div className="w-full h-full max-h-[calc(100vh-200px)]">
-                <SpectrumChart data={spectrumData} height={window.innerHeight - 200} />
+                <SpectrumChart
+                  data={spectrumData}
+                  height={window.innerHeight - 200}
+                />
               </div>
             ) : (
               <div className="text-center text-muted-foreground">
                 <Mic className="h-32 w-32 mx-auto mb-6 opacity-30" />
-                <p className="text-xl">Inicie um teste para visualizar o espectro</p>
+                <p className="text-xl">
+                  Inicie um teste para visualizar o espectro
+                </p>
               </div>
             )}
           </div>
@@ -433,7 +482,9 @@ export default function Home() {
                 <TooltipTrigger asChild>
                   <Button
                     onClick={isNoiseTestActive ? stopNoiseTest : startNoiseTest}
-                    disabled={!selectedDeviceId || permissionDenied || isRecording}
+                    disabled={
+                      !selectedDeviceId || permissionDenied || isRecording
+                    }
                     variant="outline"
                     size="lg"
                     className={cn(
@@ -498,7 +549,7 @@ export default function Home() {
               Visão geral do sistema de áudio e diagnósticos em tempo real
             </p>
           </div>
-          
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -520,9 +571,12 @@ export default function Home() {
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 neon-orange flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-foreground">Permissão de microfone negada</h3>
+                <h3 className="font-semibold text-foreground">
+                  Permissão de microfone negada
+                </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Por favor, permita o acesso no navegador para usar os recursos de teste.
+                  Por favor, permita o acesso no navegador para usar os recursos
+                  de teste.
                 </p>
               </div>
             </div>
@@ -536,9 +590,11 @@ export default function Home() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Activity className="h-5 w-5 neon-blue" />
-                <h2 className="text-xl font-bold neon-blue">Análise de Espectro</h2>
+                <h2 className="text-xl font-bold neon-blue">
+                  Análise de Espectro
+                </h2>
               </div>
-              
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -556,7 +612,7 @@ export default function Home() {
             <p className="text-sm text-muted-foreground mb-6">
               Visualização de frequência em tempo real
             </p>
-            
+
             <div className="h-[400px] flex items-center justify-center">
               {isRecording ? (
                 <SpectrumChart data={spectrumData} height={400} />
@@ -580,7 +636,7 @@ export default function Home() {
                 min: 0,
                 max: 100,
                 average: Math.round(audioLevel * 0.8),
-                unit: 'dB'
+                unit: "dB",
               }}
             />
           </Card>
@@ -596,7 +652,7 @@ export default function Home() {
                 min: 0,
                 max: 100,
                 average: Math.round(noiseLevel * 0.9),
-                unit: '%'
+                unit: "%",
               }}
             />
           </Card>
@@ -604,21 +660,25 @@ export default function Home() {
           {/* Controls */}
           <Card className="neon-card-blue lg:col-span-2 p-6">
             <h2 className="text-xl font-bold neon-blue mb-4">Controles</h2>
-            
+
             <div className="space-y-4">
               {/* Device Selection */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground mb-2 block">
                   DISPOSITIVO
                 </label>
-                <Select value={selectedDeviceId} onValueChange={setSelectedDeviceId}>
+                <Select
+                  value={selectedDeviceId}
+                  onValueChange={setSelectedDeviceId}
+                >
                   <SelectTrigger className="border-neon-blue/30">
                     <SelectValue placeholder="Selecione um dispositivo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {devices.map((device) => (
+                    {devices.map(device => (
                       <SelectItem key={device.deviceId} value={device.deviceId}>
-                        {device.label || `Dispositivo ${device.deviceId.slice(0, 8)}`}
+                        {device.label ||
+                          `Dispositivo ${device.deviceId.slice(0, 8)}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -653,15 +713,21 @@ export default function Home() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {isRecording ? "Parar gravação" : "Iniciar gravação de áudio"}
+                    {isRecording
+                      ? "Parar gravação"
+                      : "Iniciar gravação de áudio"}
                   </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      onClick={isNoiseTestActive ? stopNoiseTest : startNoiseTest}
-                      disabled={!selectedDeviceId || permissionDenied || isRecording}
+                      onClick={
+                        isNoiseTestActive ? stopNoiseTest : startNoiseTest
+                      }
+                      disabled={
+                        !selectedDeviceId || permissionDenied || isRecording
+                      }
                       variant="outline"
                       className={cn(
                         "flex-1 min-w-[140px]",
@@ -717,9 +783,14 @@ export default function Home() {
           {/* Device Status */}
           <Card className="neon-card-green p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold neon-green">Status do Dispositivo</h2>
-              
-              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+              <h2 className="text-xl font-bold neon-green">
+                Status do Dispositivo
+              </h2>
+
+              <Select
+                value={statusFilter}
+                onValueChange={(value: any) => setStatusFilter(value)}
+              >
                 <SelectTrigger className="w-[120px] h-8 border-neon-green/30 text-xs">
                   <SelectValue />
                 </SelectTrigger>
@@ -730,20 +801,23 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-3">
               {(() => {
                 const filteredDevices = devices.filter(device => {
                   const isOnline = device.deviceId === selectedDeviceId;
-                  if (statusFilter === 'online') return isOnline;
-                  if (statusFilter === 'offline') return !isOnline;
+                  if (statusFilter === "online") return isOnline;
+                  if (statusFilter === "offline") return !isOnline;
                   return true;
                 });
 
                 if (filteredDevices.length === 0) {
                   return (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p className="text-sm">Nenhum dispositivo {statusFilter === 'all' ? '' : statusFilter}</p>
+                      <p className="text-sm">
+                        Nenhum dispositivo{" "}
+                        {statusFilter === "all" ? "" : statusFilter}
+                      </p>
                     </div>
                   );
                 }
@@ -751,16 +825,22 @@ export default function Home() {
                 return filteredDevices.map(device => {
                   const isOnline = device.deviceId === selectedDeviceId;
                   return (
-                    <div key={device.deviceId} className="p-3 rounded-lg bg-background/50 border border-border space-y-2">
+                    <div
+                      key={device.deviceId}
+                      className="p-3 rounded-lg bg-background/50 border border-border space-y-2"
+                    >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground truncate flex-1">
-                          {device.label || `Dispositivo ${device.deviceId.slice(0, 8)}`}
+                          {device.label ||
+                            `Dispositivo ${device.deviceId.slice(0, 8)}`}
                         </span>
                         <div className="flex items-center gap-2">
-                          <div className={cn(
-                            "h-2 w-2 rounded-full pulse-neon",
-                            isOnline ? "bg-green-500" : "bg-gray-500"
-                          )} />
+                          <div
+                            className={cn(
+                              "h-2 w-2 rounded-full pulse-neon",
+                              isOnline ? "bg-green-500" : "bg-gray-500"
+                            )}
+                          />
                           <span className="text-xs font-medium">
                             {isOnline ? "ONLINE" : "OFFLINE"}
                           </span>
@@ -773,13 +853,16 @@ export default function Home() {
                   );
                 });
               })()}
-              
+
               <div className="pt-3 border-t border-border">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Sistema</span>
                   <span className="text-sm font-medium">
-                    {navigator.userAgent.includes('Windows') ? 'WINDOWS' : 
-                     navigator.userAgent.includes('Linux') ? 'LINUX' : 'OUTRO'}
+                    {navigator.userAgent.includes("Windows")
+                      ? "WINDOWS"
+                      : navigator.userAgent.includes("Linux")
+                        ? "LINUX"
+                        : "OUTRO"}
                   </span>
                 </div>
               </div>

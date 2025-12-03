@@ -31,7 +31,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
-  
+
   // Socket.IO setup
   const io = new SocketIOServer(server, {
     cors: {
@@ -44,7 +44,7 @@ async function startServer() {
   // Make io available globally for other modules
   (global as any).io = io;
 
-  io.on("connection", (socket) => {
+  io.on("connection", socket => {
     console.log(`[Socket.IO] Client connected: ${socket.id}`);
 
     socket.on("disconnect", () => {

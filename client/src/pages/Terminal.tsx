@@ -5,9 +5,12 @@ export default function TerminalPage() {
   return (
     <div className="space-y-6 pb-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-foreground">Terminal & Logs</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          Terminal & Logs
+        </h2>
         <p className="text-muted-foreground mt-1">
-          Monitoramento em tempo real do sistema e assistente de diagnóstico inteligente.
+          Monitoramento em tempo real do sistema e assistente de diagnóstico
+          inteligente.
         </p>
       </div>
 

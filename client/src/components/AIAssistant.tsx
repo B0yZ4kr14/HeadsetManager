@@ -1,10 +1,22 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Send, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Sparkles,
+  Send,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -29,8 +41,8 @@ export function AIAssistant() {
   const [apiKey, setApiKey] = useState("");
 
   const diagnoseMutation = trpc.headset.ai.diagnose.useMutation({
-    onSuccess: (data) => {
-      setMessages((prev) => [
+    onSuccess: data => {
+      setMessages(prev => [
         ...prev,
         {
           role: "assistant",
@@ -41,7 +53,7 @@ export function AIAssistant() {
         },
       ]);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error("Erro ao analisar com IA", {
         description: error.message,
       });
@@ -57,13 +69,14 @@ export function AIAssistant() {
     const storedApiKey = localStorage.getItem("openai_api_key");
     if (!storedApiKey) {
       toast.error("API Key não configurada", {
-        description: "Configure sua API Key nas Configurações antes de usar o assistente de IA.",
+        description:
+          "Configure sua API Key nas Configurações antes de usar o assistente de IA.",
       });
       return;
     }
 
     // Add user message
-    setMessages((prev) => [
+    setMessages(prev => [
       ...prev,
       {
         role: "user",
@@ -73,7 +86,9 @@ export function AIAssistant() {
     ]);
 
     // Prepare logs for analysis
-    const logsText = systemLogs?.map((log) => `[${log.level}] ${log.source}: ${log.message}`) || [];
+    const logsText =
+      systemLogs?.map(log => `[${log.level}] ${log.source}: ${log.message}`) ||
+      [];
 
     diagnoseMutation.mutate({
       apiKey: storedApiKey,
@@ -101,7 +116,9 @@ export function AIAssistant() {
             <div className="text-center py-8 text-muted-foreground text-sm space-y-2">
               <Sparkles className="h-8 w-8 mx-auto text-primary/50" />
               <p>Descreva o problema que está enfrentando.</p>
-              <p className="text-xs">O assistente analisará os logs recentes e fornecerá diagnóstico.</p>
+              <p className="text-xs">
+                O assistente analisará os logs recentes e fornecerá diagnóstico.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -129,7 +146,9 @@ export function AIAssistant() {
                         )}
                       </div>
                     )}
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {msg.content}
+                    </p>
                     <span className="text-[10px] text-muted-foreground mt-2 block">
                       {msg.timestamp.toLocaleTimeString("pt-BR")}
                     </span>
@@ -150,11 +169,11 @@ export function AIAssistant() {
         <div className="flex-none space-y-2">
           <Textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             placeholder="Descreva o problema (ex: 'Headset não está sendo reconhecido')"
             className="resize-none bg-background/50"
             rows={3}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSubmit();

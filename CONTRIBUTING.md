@@ -27,6 +27,7 @@ Antes de criar uma issue de bug:
 Uma descrição clara e concisa do problema.
 
 **Passos para Reproduzir**
+
 1. Vá para '...'
 2. Clique em '...'
 3. Veja o erro
@@ -38,14 +39,18 @@ O que deveria acontecer.
 Se aplicável, adicione screenshots.
 
 **Ambiente:**
- - SO: [ex: Windows 11, Ubuntu 22.04]
- - Node.js: [ex: 22.13.0]
- - Versão: [ex: 1.0.0]
+
+- SO: [ex: Windows 11, Ubuntu 22.04]
+- Node.js: [ex: 22.13.0]
+- Versão: [ex: 1.0.0]
 
 **Logs de Erro**
 ```
+
 Cole os logs aqui
+
 ```
+
 ```
 
 ### Sugerindo Melhorias
@@ -77,6 +82,7 @@ Qualquer outra informação relevante.
 #### Processo
 
 1. **Fork o repositório** e crie sua branch a partir de `main`:
+
    ```bash
    git checkout -b feature/minha-feature
    ```
@@ -86,16 +92,19 @@ Qualquer outra informação relevante.
 3. **Adicione testes** para suas mudanças
 
 4. **Execute os testes** e garanta que todos passem:
+
    ```bash
    pnpm test
    ```
 
 5. **Commit suas mudanças** usando mensagens descritivas:
+
    ```bash
    git commit -m "feat: adiciona suporte para exportação PDF"
    ```
 
 6. **Push para seu fork**:
+
    ```bash
    git push origin feature/minha-feature
    ```
@@ -105,18 +114,21 @@ Qualquer outra informação relevante.
 #### Padrões de Código
 
 **TypeScript:**
+
 - Use TypeScript estrito (`strict: true`)
 - Defina tipos explícitos para funções públicas
 - Evite `any`, use `unknown` quando necessário
 - Use interfaces para objetos complexos
 
 **React:**
+
 - Use componentes funcionais com hooks
 - Extraia lógica complexa para custom hooks
 - Use `useCallback` e `useMemo` para otimização
 - Mantenha componentes pequenos e focados
 
 **Estilo:**
+
 - Use 2 espaços para indentação
 - Máximo de 100 caracteres por linha
 - Use aspas duplas para strings
@@ -134,6 +146,7 @@ Siga o padrão [Conventional Commits](https://www.conventionalcommits.org/):
 - `chore:` Tarefas de manutenção
 
 Exemplos:
+
 ```
 feat: adiciona gráfico de tendências no histórico
 fix: corrige memory leak na gravação de áudio

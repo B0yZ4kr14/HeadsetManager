@@ -1,42 +1,70 @@
-# 🎧 Headset Manager - TSI Telecom
+# 🎧 HeadsetManager
 
 **Gerenciador Profissional de Headsets USB para Linux e Windows**
 
-Aplicação completa para diagnóstico, teste e gerenciamento de headsets USB, desenvolvida para técnicos e usuários finais da TSI Telecom.
+Sistema completo de diagnóstico, teste e gerenciamento de headsets USB (Attimo Telecom HS01/HS02 e Fanvil HT201/HT202/HT301-U), desenvolvido para técnicos e usuários finais da TSI Telecom.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Tests](https://img.shields.io/badge/tests-8%20passing-success)](https://vitest.dev/)
 
 ---
 
-## ✨ Funcionalidades
+## ✨ Funcionalidades Principais
 
 ### 🎤 Gravação e Análise de Áudio
-- Gravação de áudio com visualização de espectro em tempo real
-- Análise de qualidade de áudio (nível de ruído, frequência de pico)
-- Teste de ruído (pink noise) para validação de drivers
-- Salvamento de metadados no banco de dados para histórico
+
+- **Gravação em tempo real** com visualização de espectro colorido (Chart.js)
+- **Medidores circulares** de nível de áudio e qualidade
+- **Modo fullscreen** para análise detalhada durante testes prolongados
+- **Teste de ruído branco** para validação de cancelamento de ruído
+- **Download local** de gravações (formato WebM)
+- **Metadados persistentes** no banco de dados para histórico de manutenção
 
 ### 🔧 Diagnóstico e Troubleshooting
+
 - **10 scripts pré-configurados** para resolução de problemas comuns:
-  - Verificação de drivers USB
+  - Verificação de drivers USB (lsusb, dmesg)
   - Análise de logs do kernel
   - Testes de PulseAudio/ALSA
-  - Diagnóstico de permissões
-- Execução com um clique e histórico de resultados
-- Categorização por tipo (driver, áudio, sistema, rede)
+  - Diagnóstico de permissões de áudio
+  - Verificação de codecs e sample rates
+- **Execução com um clique** e histórico completo de resultados
+- **Categorização automática** por tipo (driver, áudio, sistema, rede)
+- **Filtros de status** (online/offline) para dispositivos
 
 ### 🤖 Assistente de IA (Opcional)
-- Análise inteligente de logs com OpenAI, Anthropic ou Google Gemini
-- Sugestões automáticas de correção
-- Diagnóstico com nível de severidade e confiança
+
+- **Análise inteligente de logs** com OpenAI GPT-4o-mini, Anthropic Claude ou Google Gemini
+- **Sugestões automáticas** de correção com nível de severidade
+- **Diagnóstico com confiança** (0-100%)
+- **Configuração flexível** de API Key (suporta múltiplos provedores)
 
 ### 📊 Monitoramento em Tempo Real
-- WebSockets para logs do sistema ao vivo
-- Painel de terminal integrado
-- Notificações de execução de scripts
+
+- **WebSockets** para logs do sistema ao vivo
+- **Painel de terminal integrado** com exportação de logs (.txt)
+- **Notificações** de execução de scripts e alertas
+- **Sistema de atualizações** via GitHub Releases
 
 ### 📝 Histórico e Relatórios
-- Registro completo de todas as gravações
-- Métricas de qualidade ao longo do tempo
-- Consulta para manutenção preventiva
+
+- **Registro completo** de todas as gravações com metadados
+- **Métricas de qualidade** ao longo do tempo
+- **Consulta para manutenção preventiva**
+- **FAQ integrado** com guias de instalação e troubleshooting
+
+---
+
+## 🎨 Interface
+
+- **Tema neon dark moderno** com paleta azul TSI (#1E3A8A, #2563EB)
+- **Layout Bento Grid** responsivo e modular
+- **Glassmorphism effects** com bordas neon (azul/verde/laranja)
+- **Tooltips explicativos** em todos os botões (UX para leigos)
+- **Loading states** e skeleton loaders
+- **Efeitos hover** interativos nos medidores circulares
 
 ---
 
@@ -68,8 +96,9 @@ chmod +x HeadsetManager-Installer.bin
 ### Instalação Manual (Desenvolvimento)
 
 **Requisitos:**
-- Node.js 22.x
-- PostgreSQL 14+
+
+- Node.js 22.x ou superior
+- PostgreSQL 14+ (ou MySQL/TiDB compatível)
 - pnpm 9.x
 
 ```bash
@@ -81,8 +110,8 @@ cd HeadsetManager
 pnpm install
 
 # Configure o banco de dados
-cp .env.example .env
-# Edite .env com suas credenciais do PostgreSQL
+# As variáveis de ambiente são injetadas automaticamente pelo Manus
+# Para desenvolvimento local, configure DATABASE_URL manualmente
 
 # Execute migrações
 pnpm db:push
@@ -92,68 +121,95 @@ pnpm seed
 
 # Inicie o servidor de desenvolvimento
 pnpm dev
+
+# Acesse: http://localhost:3000
 ```
 
 ---
 
-## 📖 Uso
+## 📖 Uso Básico
 
-### 1. Dashboard Principal
+### 1. Seleção de Dispositivo
 
-Acesse `http://localhost:3000` (ou o endereço do servidor instalado).
+1. Clique no botão **Atualizar** (ícone de refresh) no canto superior direito
+2. Selecione o headset USB no dropdown **DISPOSITIVO**
+3. O status mudará para **ONLINE** (indicador verde)
 
-- **Análise de Espectro:** Visualize frequências em tempo real
-- **Gravação:** Clique em "Iniciar Gravação" para capturar áudio
-- **Teste de Ruído:** Execute pink noise para validar drivers
-- **Dispositivo Ativo:** Selecione o headset a ser testado
+### 2. Gravação de Áudio
 
-### 2. Diagnósticos Manuais
+1. Clique em **Iniciar Gravação** (ícone de microfone)
+2. O analisador de espectro exibirá as frequências em tempo real
+3. Os medidores circulares mostrarão **Nível** (dB) e **Qualidade** (%)
+4. Clique em **Parar** para finalizar a gravação
+5. Use **Reproduzir** para ouvir a gravação
+6. Clique em **Salvar** para fazer download local
 
-Navegue para **Diagnósticos** no menu lateral.
+### 3. Teste de Cancelamento de Ruído
 
-- Escolha uma categoria (Driver, Áudio, Sistema, Rede)
-- Clique em "Executar" no script desejado
-- Veja o resultado em tempo real no painel de histórico
+1. Selecione o dispositivo
+2. Clique em **Teste de Ruído**
+3. Um ruído branco será reproduzido
+4. A gravação iniciará automaticamente
+5. Analise a qualidade de cancelamento nos medidores
 
-### 3. Configuração de IA (Opcional)
+### 4. Diagnósticos Manuais
 
-1. Acesse **Configurações**
-2. Selecione o provedor de IA (OpenAI, Anthropic ou Gemini)
+1. Acesse **Diagnósticos** no menu lateral
+2. Escolha um script da lista (ex: "Verificar Drivers USB")
+3. Clique em **Executar**
+4. Aguarde a conclusão e visualize os resultados
+5. Consulte o **Histórico de Execuções** abaixo
+
+### 5. Assistente de IA (Opcional)
+
+1. Acesse **Configurações** no menu lateral
+2. Escolha o provedor (OpenAI/Anthropic/Gemini)
 3. Insira sua API Key
-4. Salve as alterações
-5. O assistente de IA estará disponível em **Terminal & Logs**
-
-### 4. Histórico de Gravações
-
-Navegue para **Histórico** para visualizar:
-- Todas as gravações anteriores
-- Métricas de qualidade (duração, nível de ruído, frequência de pico)
-- Filtros por data e qualidade
+4. Clique em **Salvar Configurações**
+5. Retorne ao **Dashboard** e use o chat de IA no canto inferior direito
 
 ---
 
-## 🛠️ Tecnologias
+## 🏗️ Arquitetura Técnica
 
-### Frontend
-- **React 19** - Interface moderna e reativa
-- **Tailwind CSS 4** - Design system com tema dark TSI
-- **shadcn/ui** - Componentes acessíveis
-- **Wouter** - Roteamento client-side
-- **Socket.IO Client** - WebSockets para tempo real
+### Stack
 
-### Backend
-- **Node.js 22** + **Express** - Servidor HTTP
-- **tRPC** - Type-safe API
-- **PostgreSQL** - Banco de dados relacional
-- **Drizzle ORM** - ORM TypeScript-first
-- **Socket.IO** - WebSockets
-- **OpenAI SDK** - Integração com IA
+- **Frontend**: React 19 + TypeScript + Tailwind CSS 4 + shadcn/ui
+- **Backend**: Next.js 14 (App Router) + tRPC 11 + Express 4
+- **Database**: PostgreSQL (via Drizzle ORM)
+- **Real-time**: Socket.IO (WebSockets)
+- **Charts**: Chart.js 4
+- **Audio**: Web Audio API + MediaRecorder API
+- **Tests**: Vitest (8 testes unitários)
 
-### DevOps
-- **Vite** - Build tool ultra-rápido
-- **TypeScript** - Type safety
-- **Vitest** - Testes unitários
-- **Prettier** - Formatação de código
+### Estrutura de Diretórios
+
+```
+headset_demo_web/
+├── client/                 # Frontend React
+│   ├── public/            # Assets estáticos
+│   └── src/
+│       ├── pages/         # Páginas (Home, Diagnostics, etc.)
+│       ├── components/    # Componentes reutilizáveis
+│       └── lib/           # Utilitários e tRPC client
+├── server/                # Backend Node.js
+│   ├── _core/            # Infraestrutura (OAuth, tRPC, LLM)
+│   ├── routers/          # Rotas tRPC
+│   └── services/         # Serviços (OpenAI, Socket.IO)
+├── drizzle/              # Schema e migrações do banco
+├── shared/               # Tipos compartilhados
+└── scripts/              # Build scripts para instaladores
+```
+
+### Database Schema
+
+- **devices**: Dispositivos de áudio detectados
+- **audio_tests**: Gravações e metadados
+- **system_logs**: Logs do sistema
+- **troubleshooting_scripts**: Scripts de diagnóstico
+- **script_executions**: Histórico de execuções
+- **ai_diagnostics**: Análises de IA
+- **user_settings**: Configurações do usuário (API Keys)
 
 ---
 
@@ -163,27 +219,35 @@ Navegue para **Histórico** para visualizar:
 # Executar todos os testes
 pnpm test
 
-# Executar testes em modo watch
-pnpm test:watch
-
-# Cobertura de testes
+# Testes com cobertura
 pnpm test:coverage
+
+# Testes em modo watch
+pnpm test:watch
 ```
 
-**Cobertura atual:** 8 testes passando (troubleshooting, IA, autenticação)
+**Cobertura atual**: 8 testes passando
+- Autenticação (logout)
+- Integração com OpenAI (3 testes)
+- Troubleshooting scripts (4 testes)
 
 ---
 
-## 📦 Build para Produção
+## 🔧 Build e Deploy
 
-### Web Application
+### Desenvolvimento
 
 ```bash
-# Build do frontend e backend
-pnpm build
+pnpm dev          # Inicia servidor de desenvolvimento (porta 3000)
+pnpm db:push      # Sincroniza schema do banco
+pnpm seed         # Popula scripts de troubleshooting
+```
 
-# Iniciar em produção
-pnpm start
+### Produção
+
+```bash
+pnpm build        # Build otimizado para produção
+pnpm start        # Inicia servidor de produção
 ```
 
 ### Instaladores
@@ -199,15 +263,13 @@ pnpm build:linux
 pnpm build:installers
 ```
 
-Os instaladores serão gerados em `dist/installers/`.
-
 ---
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Por favor, leia [CONTRIBUTING.md](CONTRIBUTING.md) para detalhes sobre nosso código de conduta e processo de pull requests.
+Contribuições são bem-vindas! Por favor, leia o [CONTRIBUTING.md](CONTRIBUTING.md) para detalhes sobre nosso código de conduta e processo de pull requests.
 
-### Desenvolvimento
+### Passos para Contribuir
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
@@ -219,39 +281,44 @@ Contribuições são bem-vindas! Por favor, leia [CONTRIBUTING.md](CONTRIBUTING.
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ---
 
-## 👥 Autores
+## 🆘 Suporte
 
-- **TSI Telecom** - *Desenvolvimento inicial* - [B0yZ4kr14](https://github.com/B0yZ4kr14)
+### FAQ
+
+Consulte a seção **Documentação** no aplicativo para perguntas frequentes sobre:
+- Instalação e configuração inicial
+- Troubleshooting de drivers USB
+- Configuração de API Keys para IA
+- Problemas comuns de áudio
+
+### Reportar Bugs
+
+Abra uma [issue no GitHub](https://github.com/B0yZ4kr14/HeadsetManager/issues) com:
+- Descrição detalhada do problema
+- Passos para reproduzir
+- Sistema operacional e versão
+- Logs relevantes (exportados via Terminal & Logs)
+
+### Contato
+
+- **Desenvolvedor**: TSI Telecom
+- **Email**: suporte@tsitelecom.com.br
+- **Website**: https://tsitelecom.com.br
 
 ---
 
 ## 🙏 Agradecimentos
 
-- Equipe de suporte da TSI Telecom
-- Comunidade open-source do React e Node.js
-- Contribuidores do projeto
+- [shadcn/ui](https://ui.shadcn.com/) - Componentes UI
+- [Chart.js](https://www.chartjs.org/) - Visualização de dados
+- [tRPC](https://trpc.io/) - Type-safe APIs
+- [Drizzle ORM](https://orm.drizzle.team/) - Database toolkit
+- [Vitest](https://vitest.dev/) - Testing framework
 
 ---
 
-## 📞 Suporte
-
-Para suporte, abra uma [issue](https://github.com/B0yZ4kr14/HeadsetManager/issues) ou entre em contato com a equipe TSI Telecom.
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Exportação de relatórios em PDF
-- [ ] Gráficos de tendências de qualidade
-- [ ] Alertas automáticos de degradação
-- [ ] Suporte para múltiplos idiomas
-- [ ] Modo offline com sincronização
-- [ ] Integração com sistemas de ticketing
-
----
-
-**Desenvolvido com ❤️ pela TSI Telecom**
+**Desenvolvido com ❤️ pela equipe TSI Telecom**

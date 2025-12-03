@@ -1,7 +1,25 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, BookOpen, HelpCircle, Lightbulb, Settings, Wrench } from "lucide-react";
+import {
+  AlertCircle,
+  BookOpen,
+  HelpCircle,
+  Lightbulb,
+  Settings,
+  Wrench,
+} from "lucide-react";
 import { Streamdown } from "streamdown";
 
 const installGuide = `
@@ -115,7 +133,8 @@ export default function Docs() {
       <div className="space-y-2">
         <h1 className="text-4xl font-bold tracking-tight">Documentação</h1>
         <p className="text-muted-foreground text-lg">
-          Guia completo de instalação, uso e resolução de problemas do Headset Manager
+          Guia completo de instalação, uso e resolução de problemas do Headset
+          Manager
         </p>
       </div>
 
@@ -141,30 +160,40 @@ export default function Docs() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <h3 className="font-semibold text-lg">1. Conecte seu Headset USB</h3>
+                <h3 className="font-semibold text-lg">
+                  1. Conecte seu Headset USB
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Conecte o headset USB ao computador. O sistema detectará automaticamente o dispositivo.
+                  Conecte o headset USB ao computador. O sistema detectará
+                  automaticamente o dispositivo.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h3 className="font-semibold text-lg">2. Selecione o Dispositivo</h3>
+                <h3 className="font-semibold text-lg">
+                  2. Selecione o Dispositivo
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  No Dashboard, selecione o headset no dropdown "Dispositivo Ativo" (canto superior direito).
+                  No Dashboard, selecione o headset no dropdown "Dispositivo
+                  Ativo" (canto superior direito).
                 </p>
               </div>
 
               <div className="space-y-2">
                 <h3 className="font-semibold text-lg">3. Execute Testes</h3>
                 <p className="text-sm text-muted-foreground">
-                  Clique em "Iniciar Gravação" para testar o microfone ou "Teste de Ruído" para validar os drivers de áudio.
+                  Clique em "Iniciar Gravação" para testar o microfone ou "Teste
+                  de Ruído" para validar os drivers de áudio.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h3 className="font-semibold text-lg">4. Diagnóstico (Opcional)</h3>
+                <h3 className="font-semibold text-lg">
+                  4. Diagnóstico (Opcional)
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Acesse "Diagnósticos" no menu lateral para executar scripts de troubleshooting se houver problemas.
+                  Acesse "Diagnósticos" no menu lateral para executar scripts de
+                  troubleshooting se houver problemas.
                 </p>
               </div>
             </CardContent>
@@ -214,10 +243,14 @@ export default function Docs() {
                       <strong>Método 1: Instalador .msi (Recomendado)</strong>
                     </p>
                     <ol className="list-decimal list-inside space-y-1 ml-4">
-                      <li>Baixe o arquivo <code>HeadsetManager-Setup.msi</code></li>
+                      <li>
+                        Baixe o arquivo <code>HeadsetManager-Setup.msi</code>
+                      </li>
                       <li>Execute o instalador com duplo clique</li>
                       <li>Siga as instruções na tela</li>
-                      <li>Acesse pelo menu Iniciar: TSI Telecom → Headset Manager</li>
+                      <li>
+                        Acesse pelo menu Iniciar: TSI Telecom → Headset Manager
+                      </li>
                     </ol>
                   </AccordionContent>
                 </AccordionItem>
@@ -228,10 +261,14 @@ export default function Docs() {
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground space-y-2">
                     <p>
-                      O navegador precisa de permissão explícita para acessar o microfone. Para resolver:
+                      O navegador precisa de permissão explícita para acessar o
+                      microfone. Para resolver:
                     </p>
                     <ol className="list-decimal list-inside space-y-1 ml-4">
-                      <li>Clique no ícone de cadeado/informação na barra de endereço</li>
+                      <li>
+                        Clique no ícone de cadeado/informação na barra de
+                        endereço
+                      </li>
                       <li>Procure por "Microfone" nas permissões</li>
                       <li>Altere para "Permitir"</li>
                       <li>Recarregue a página (F5)</li>
@@ -247,13 +284,16 @@ export default function Docs() {
                     <p>Possíveis causas e soluções:</p>
                     <ul className="list-disc list-inside space-y-1 ml-4">
                       <li>
-                        <strong>Headset não conectado:</strong> Verifique se o cabo USB está bem conectado
+                        <strong>Headset não conectado:</strong> Verifique se o
+                        cabo USB está bem conectado
                       </li>
                       <li>
-                        <strong>Driver não instalado:</strong> Acesse "Diagnósticos" e execute "Verificar Drivers USB"
+                        <strong>Driver não instalado:</strong> Acesse
+                        "Diagnósticos" e execute "Verificar Drivers USB"
                       </li>
                       <li>
-                        <strong>Recarregue a página:</strong> Clique no botão "Escanear" ou pressione F5
+                        <strong>Recarregue a página:</strong> Clique no botão
+                        "Escanear" ou pressione F5
                       </li>
                     </ul>
                   </AccordionContent>
@@ -264,19 +304,25 @@ export default function Docs() {
                     Como interpretar a qualidade da gravação?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground space-y-2">
-                    <p>O sistema analisa automaticamente a qualidade do áudio:</p>
+                    <p>
+                      O sistema analisa automaticamente a qualidade do áudio:
+                    </p>
                     <ul className="list-disc list-inside space-y-1 ml-4">
                       <li>
-                        <strong className="text-green-500">Excelente:</strong> Nível de ruído &lt; -40 dB
+                        <strong className="text-green-500">Excelente:</strong>{" "}
+                        Nível de ruído &lt; -40 dB
                       </li>
                       <li>
-                        <strong className="text-blue-500">Bom:</strong> Nível de ruído entre -40 e -30 dB
+                        <strong className="text-blue-500">Bom:</strong> Nível de
+                        ruído entre -40 e -30 dB
                       </li>
                       <li>
-                        <strong className="text-yellow-500">Regular:</strong> Nível de ruído entre -30 e -20 dB
+                        <strong className="text-yellow-500">Regular:</strong>{" "}
+                        Nível de ruído entre -30 e -20 dB
                       </li>
                       <li>
-                        <strong className="text-red-500">Ruim:</strong> Nível de ruído &gt; -20 dB
+                        <strong className="text-red-500">Ruim:</strong> Nível de
+                        ruído &gt; -20 dB
                       </li>
                     </ul>
                   </AccordionContent>
@@ -287,11 +333,16 @@ export default function Docs() {
                     Como configurar o Assistente de IA?
                   </AccordionTrigger>
                   <AccordionContent className="text-sm text-muted-foreground space-y-2">
-                    <p>O assistente de IA é <strong>opcional</strong> e requer uma API Key:</p>
+                    <p>
+                      O assistente de IA é <strong>opcional</strong> e requer
+                      uma API Key:
+                    </p>
                     <ol className="list-decimal list-inside space-y-1 ml-4">
                       <li>Acesse "Configurações" no menu lateral</li>
                       <li>Role até a seção "Integração de IA"</li>
-                      <li>Selecione o provedor (OpenAI, Anthropic ou Gemini)</li>
+                      <li>
+                        Selecione o provedor (OpenAI, Anthropic ou Gemini)
+                      </li>
                       <li>Insira sua API Key</li>
                       <li>Clique em "Salvar Configurações"</li>
                     </ol>
@@ -305,7 +356,7 @@ export default function Docs() {
                   <AccordionContent className="text-sm text-muted-foreground space-y-2">
                     <p>Verifique se o PostgreSQL está rodando:</p>
                     <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
-{`# Linux
+                      {`# Linux
 sudo systemctl status postgresql
 
 # Windows
@@ -331,7 +382,8 @@ Get-Service -Name postgresql*`}
                 <div className="space-y-1">
                   <h4 className="font-semibold">Áudio com ruído excessivo</h4>
                   <p className="text-sm text-muted-foreground">
-                    Execute "Teste de Ruído" no Dashboard para validar os drivers. Se o problema persistir, acesse "Diagnósticos".
+                    Execute "Teste de Ruído" no Dashboard para validar os
+                    drivers. Se o problema persistir, acesse "Diagnósticos".
                   </p>
                 </div>
               </div>
@@ -341,7 +393,8 @@ Get-Service -Name postgresql*`}
                 <div className="space-y-1">
                   <h4 className="font-semibold">Manutenção Preventiva</h4>
                   <p className="text-sm text-muted-foreground">
-                    Acesse "Histórico" regularmente para monitorar a qualidade de áudio ao longo do tempo.
+                    Acesse "Histórico" regularmente para monitorar a qualidade
+                    de áudio ao longo do tempo.
                   </p>
                 </div>
               </div>
@@ -351,7 +404,8 @@ Get-Service -Name postgresql*`}
                 <div className="space-y-1">
                   <h4 className="font-semibold">Otimização de Performance</h4>
                   <p className="text-sm text-muted-foreground">
-                    Para melhor performance, feche abas desnecessárias do navegador.
+                    Para melhor performance, feche abas desnecessárias do
+                    navegador.
                   </p>
                 </div>
               </div>

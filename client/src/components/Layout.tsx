@@ -1,6 +1,16 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Headphones, Terminal, FileText, Settings, Menu, X, HelpCircle, Wrench, History } from "lucide-react";
+import {
+  Headphones,
+  Terminal,
+  FileText,
+  Settings,
+  Menu,
+  X,
+  HelpCircle,
+  Wrench,
+  History,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { UpdateNotification } from "@/components/UpdateNotification";
@@ -31,16 +41,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             filter: "drop-shadow(0 0 10px hsl(217, 91%, 60%))",
           }}
         />
-        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
           {isMobileMenuOpen ? <X /> : <Menu />}
         </Button>
       </div>
 
       {/* Sidebar Navigation */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0",
-        isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-neon-blue/20 hidden md:flex flex-col items-center gap-2">
             <img
@@ -57,17 +73,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <nav className="flex-1 p-4 space-y-1">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const isActive = location === item.href;
               return (
-                <Link key={item.href} href={item.href} className={cn(
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
                     "flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 rounded-md",
-                    isActive 
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md" 
+                    isActive
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}>
-                    <item.icon size={18} />
-                    {item.label}
+                  )}
+                >
+                  <item.icon size={18} />
+                  {item.label}
                 </Link>
               );
             })}
@@ -95,15 +115,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 overflow-y-auto h-[calc(100vh-65px)] md:h-screen bg-background relative">
         {/* Background decorative element */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        
+
         <div className="container py-8 md:py-12 max-w-7xl mx-auto relative z-10">
           {children}
         </div>
       </main>
-      
+
       {/* Overlay for mobile */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />

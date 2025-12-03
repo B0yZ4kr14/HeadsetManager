@@ -1,12 +1,12 @@
 import { eq, desc, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { 
-  InsertUser, 
-  users, 
-  audioDevices, 
-  audioTests, 
-  systemLogs, 
-  troubleshootingScripts, 
+import {
+  InsertUser,
+  users,
+  audioDevices,
+  audioTests,
+  systemLogs,
+  troubleshootingScripts,
   scriptExecutions,
   aiDiagnostics,
   InsertAudioDevice,
@@ -14,9 +14,9 @@ import {
   InsertSystemLog,
   InsertTroubleshootingScript,
   InsertScriptExecution,
-  InsertAIDiagnostic
+  InsertAIDiagnostic,
 } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -71,8 +71,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -99,7 +99,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -109,19 +113,26 @@ export async function upsertAudioDevice(device: InsertAudioDevice) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  await db.insert(audioDevices).values(device).onDuplicateKeyUpdate({
-    set: {
-      label: device.label,
-      lastSeen: new Date(),
-    },
-  });
+  await db
+    .insert(audioDevices)
+    .values(device)
+    .onDuplicateKeyUpdate({
+      set: {
+        label: device.label,
+        lastSeen: new Date(),
+      },
+    });
 }
 
 export async function getAudioDevicesByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(audioDevices).where(eq(audioDevices.userId, userId)).orderBy(desc(audioDevices.lastSeen));
+  return await db
+    .select()
+    .from(audioDevices)
+    .where(eq(audioDevices.userId, userId))
+    .orderBy(desc(audioDevices.lastSeen));
 }
 
 // Audio Tests
@@ -137,7 +148,12 @@ export async function getAudioTestsByUserId(userId: number, limit = 50) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(audioTests).where(eq(audioTests.userId, userId)).orderBy(desc(audioTests.createdAt)).limit(limit);
+  return await db
+    .select()
+    .from(audioTests)
+    .where(eq(audioTests.userId, userId))
+    .orderBy(desc(audioTests.createdAt))
+    .limit(limit);
 }
 
 // System Logs
@@ -152,14 +168,23 @@ export async function getSystemLogsByUserId(userId: number, limit = 100) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(systemLogs).where(eq(systemLogs.userId, userId)).orderBy(desc(systemLogs.createdAt)).limit(limit);
+  return await db
+    .select()
+    .from(systemLogs)
+    .where(eq(systemLogs.userId, userId))
+    .orderBy(desc(systemLogs.createdAt))
+    .limit(limit);
 }
 
 export async function getAllSystemLogs(limit = 100) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(systemLogs).orderBy(desc(systemLogs.createdAt)).limit(limit);
+  return await db
+    .select()
+    .from(systemLogs)
+    .orderBy(desc(systemLogs.createdAt))
+    .limit(limit);
 }
 
 // Troubleshooting Scripts
@@ -168,18 +193,28 @@ export async function getTroubleshootingScripts(category?: string) {
   if (!db) return [];
 
   if (category) {
-    return await db.select().from(troubleshootingScripts)
-      .where(and(
-        eq(troubleshootingScripts.isActive, true),
-        eq(troubleshootingScripts.category, category as any)
-      ))
+    return await db
+      .select()
+      .from(troubleshootingScripts)
+      .where(
+        and(
+          eq(troubleshootingScripts.isActive, true),
+          eq(troubleshootingScripts.category, category as any)
+        )
+      )
       .orderBy(troubleshootingScripts.name);
   }
 
-  return await db.select().from(troubleshootingScripts).where(eq(troubleshootingScripts.isActive, true)).orderBy(troubleshootingScripts.name);
+  return await db
+    .select()
+    .from(troubleshootingScripts)
+    .where(eq(troubleshootingScripts.isActive, true))
+    .orderBy(troubleshootingScripts.name);
 }
 
-export async function createTroubleshootingScript(script: InsertTroubleshootingScript) {
+export async function createTroubleshootingScript(
+  script: InsertTroubleshootingScript
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
@@ -196,18 +231,29 @@ export async function createScriptExecution(execution: InsertScriptExecution) {
   return result;
 }
 
-export async function updateScriptExecution(id: number, updates: Partial<InsertScriptExecution>) {
+export async function updateScriptExecution(
+  id: number,
+  updates: Partial<InsertScriptExecution>
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  await db.update(scriptExecutions).set(updates).where(eq(scriptExecutions.id, id));
+  await db
+    .update(scriptExecutions)
+    .set(updates)
+    .where(eq(scriptExecutions.id, id));
 }
 
 export async function getScriptExecutionsByUserId(userId: number, limit = 50) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(scriptExecutions).where(eq(scriptExecutions.userId, userId)).orderBy(desc(scriptExecutions.createdAt)).limit(limit);
+  return await db
+    .select()
+    .from(scriptExecutions)
+    .where(eq(scriptExecutions.userId, userId))
+    .orderBy(desc(scriptExecutions.createdAt))
+    .limit(limit);
 }
 
 // AI Diagnostics
@@ -223,12 +269,23 @@ export async function getAIDiagnosticsByUserId(userId: number, limit = 20) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(aiDiagnostics).where(eq(aiDiagnostics.userId, userId)).orderBy(desc(aiDiagnostics.createdAt)).limit(limit);
+  return await db
+    .select()
+    .from(aiDiagnostics)
+    .where(eq(aiDiagnostics.userId, userId))
+    .orderBy(desc(aiDiagnostics.createdAt))
+    .limit(limit);
 }
 
-export async function updateAIDiagnosticFeedback(id: number, wasHelpful: boolean) {
+export async function updateAIDiagnosticFeedback(
+  id: number,
+  wasHelpful: boolean
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  await db.update(aiDiagnostics).set({ wasHelpful }).where(eq(aiDiagnostics.id, id));
+  await db
+    .update(aiDiagnostics)
+    .set({ wasHelpful })
+    .where(eq(aiDiagnostics.id, id));
 }

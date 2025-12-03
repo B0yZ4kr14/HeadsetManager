@@ -64,11 +64,13 @@ describe("headset.troubleshooting", () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
 
-    const result = await caller.headset.troubleshooting.listScripts({ category: "audio" });
+    const result = await caller.headset.troubleshooting.listScripts({
+      category: "audio",
+    });
 
     expect(result).toBeDefined();
     expect(Array.isArray(result)).toBe(true);
-    
+
     // All returned scripts should be in the 'audio' category
     result.forEach(script => {
       expect(script.category).toBe("audio");
@@ -93,11 +95,13 @@ describe("headset.troubleshooting", () => {
     // Get the script we just created
     const scripts = await caller.headset.troubleshooting.listScripts({});
     const testScript = scripts.find(s => s.name === "Echo Test");
-    
+
     expect(testScript).toBeDefined();
-    
+
     if (testScript) {
-      const result = await caller.headset.troubleshooting.executeScript({ scriptId: testScript.id });
+      const result = await caller.headset.troubleshooting.executeScript({
+        scriptId: testScript.id,
+      });
 
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
@@ -111,7 +115,9 @@ describe("headset.troubleshooting", () => {
     const caller = appRouter.createCaller(ctx);
 
     // Get execution history
-    const history = await caller.headset.troubleshooting.listExecutions({ limit: 10 });
+    const history = await caller.headset.troubleshooting.listExecutions({
+      limit: 10,
+    });
 
     expect(history).toBeDefined();
     expect(Array.isArray(history)).toBe(true);

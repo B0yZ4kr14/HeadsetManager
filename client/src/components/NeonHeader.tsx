@@ -9,10 +9,11 @@ export function NeonHeader() {
             alt="tSitelecom"
             className="h-16 md:h-20 object-contain"
             style={{
-              filter: "drop-shadow(0 0 20px hsl(217, 91%, 60%)) drop-shadow(0 0 40px hsl(217, 91%, 60% / 0.5))",
+              filter:
+                "drop-shadow(0 0 20px hsl(217, 91%, 60%)) drop-shadow(0 0 40px hsl(217, 91%, 60% / 0.5))",
             }}
           />
-          
+
           {/* Subtitle */}
           <div className="text-center mt-2">
             <span className="text-xs md:text-sm uppercase tracking-[0.3em] font-light text-muted-foreground">

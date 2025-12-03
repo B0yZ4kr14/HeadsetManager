@@ -1,12 +1,36 @@
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Save, Sparkles, Key, Info, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Save,
+  Sparkles,
+  Key,
+  Info,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -33,15 +57,39 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 const AI_PROVIDERS = [
-  { value: "openai", label: "OpenAI (GPT-4o)", description: "Modelo mais avançado da OpenAI" },
-  { value: "anthropic", label: "Anthropic (Claude 3.5)", description: "Excelente para análise técnica" },
-  { value: "gemini", label: "Google Gemini", description: "Modelo multimodal do Google" },
+  {
+    value: "openai",
+    label: "OpenAI (GPT-4o)",
+    description: "Modelo mais avançado da OpenAI",
+  },
+  {
+    value: "anthropic",
+    label: "Anthropic (Claude 3.5)",
+    description: "Excelente para análise técnica",
+  },
+  {
+    value: "gemini",
+    label: "Google Gemini",
+    description: "Modelo multimodal do Google",
+  },
 ] as const;
 
 const AUDIO_PROFILES = [
-  { value: "pro-audio", label: "Pro Audio (Recomendado)", description: "Melhor qualidade, baixa latência" },
-  { value: "analog-stereo", label: "Analog Stereo Duplex", description: "Compatibilidade máxima" },
-  { value: "digital-stereo", label: "Digital Stereo (IEC958)", description: "Saída digital" },
+  {
+    value: "pro-audio",
+    label: "Pro Audio (Recomendado)",
+    description: "Melhor qualidade, baixa latência",
+  },
+  {
+    value: "analog-stereo",
+    label: "Analog Stereo Duplex",
+    description: "Compatibilidade máxima",
+  },
+  {
+    value: "digital-stereo",
+    label: "Digital Stereo (IEC958)",
+    description: "Saída digital",
+  },
 ] as const;
 
 const STORAGE_KEY_PREFIX = "headset_settings_";
@@ -58,15 +106,28 @@ export default function SettingsPage() {
     try {
       const stored: Partial<Settings> = {
         aiApiKey: localStorage.getItem(`${STORAGE_KEY_PREFIX}ai_api_key`) || "",
-        aiProvider: (localStorage.getItem(`${STORAGE_KEY_PREFIX}ai_provider`) as Settings["aiProvider"]) || "openai",
-        autoSwitch: localStorage.getItem(`${STORAGE_KEY_PREFIX}auto_switch`) === "true",
-        desktopNotifications: localStorage.getItem(`${STORAGE_KEY_PREFIX}desktop_notifications`) !== "false",
-        debugMode: localStorage.getItem(`${STORAGE_KEY_PREFIX}debug_mode`) === "true",
-        defaultVolume: parseInt(localStorage.getItem(`${STORAGE_KEY_PREFIX}default_volume`) || "60", 10),
-        audioProfile: (localStorage.getItem(`${STORAGE_KEY_PREFIX}audio_profile`) as Settings["audioProfile"]) || "pro-audio",
+        aiProvider:
+          (localStorage.getItem(
+            `${STORAGE_KEY_PREFIX}ai_provider`
+          ) as Settings["aiProvider"]) || "openai",
+        autoSwitch:
+          localStorage.getItem(`${STORAGE_KEY_PREFIX}auto_switch`) === "true",
+        desktopNotifications:
+          localStorage.getItem(`${STORAGE_KEY_PREFIX}desktop_notifications`) !==
+          "false",
+        debugMode:
+          localStorage.getItem(`${STORAGE_KEY_PREFIX}debug_mode`) === "true",
+        defaultVolume: parseInt(
+          localStorage.getItem(`${STORAGE_KEY_PREFIX}default_volume`) || "60",
+          10
+        ),
+        audioProfile:
+          (localStorage.getItem(
+            `${STORAGE_KEY_PREFIX}audio_profile`
+          ) as Settings["audioProfile"]) || "pro-audio",
       };
 
-      setSettings((prev) => ({ ...prev, ...stored }));
+      setSettings(prev => ({ ...prev, ...stored }));
     } catch (error) {
       console.error("Erro ao carregar configurações:", error);
       toast.error("Erro ao carregar configurações salvas");
@@ -74,31 +135,40 @@ export default function SettingsPage() {
   }, []);
 
   // Update individual setting
-  const updateSetting = useCallback(<K extends keyof Settings>(key: K, value: Settings[K]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-    setHasChanges(true);
-  }, []);
+  const updateSetting = useCallback(
+    <K extends keyof Settings>(key: K, value: Settings[K]) => {
+      setSettings(prev => ({ ...prev, [key]: value }));
+      setHasChanges(true);
+    },
+    []
+  );
 
   // Validate API key format
-  const validateApiKey = useCallback((provider: Settings["aiProvider"], key: string): boolean => {
-    if (!key.trim()) return true; // Empty is valid (user may not want AI)
+  const validateApiKey = useCallback(
+    (provider: Settings["aiProvider"], key: string): boolean => {
+      if (!key.trim()) return true; // Empty is valid (user may not want AI)
 
-    switch (provider) {
-      case "openai":
-        return key.startsWith("sk-") && key.length > 20;
-      case "anthropic":
-        return key.startsWith("sk-ant-") && key.length > 20;
-      case "gemini":
-        return key.length > 20; // Gemini doesn't have a specific prefix
-      default:
-        return false;
-    }
-  }, []);
+      switch (provider) {
+        case "openai":
+          return key.startsWith("sk-") && key.length > 20;
+        case "anthropic":
+          return key.startsWith("sk-ant-") && key.length > 20;
+        case "gemini":
+          return key.length > 20; // Gemini doesn't have a specific prefix
+        default:
+          return false;
+      }
+    },
+    []
+  );
 
   // Save settings to localStorage
   const handleSave = useCallback(async () => {
     // Validate API key if provided
-    if (settings.aiApiKey && !validateApiKey(settings.aiProvider, settings.aiApiKey)) {
+    if (
+      settings.aiApiKey &&
+      !validateApiKey(settings.aiProvider, settings.aiApiKey)
+    ) {
       toast.error("API Key inválida", {
         description: `Formato incorreto para ${AI_PROVIDERS.find(p => p.value === settings.aiProvider)?.label}`,
       });
@@ -117,13 +187,34 @@ export default function SettingsPage() {
 
     try {
       // Save to localStorage
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}ai_api_key`, settings.aiApiKey);
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}ai_provider`, settings.aiProvider);
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}auto_switch`, settings.autoSwitch.toString());
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}desktop_notifications`, settings.desktopNotifications.toString());
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}debug_mode`, settings.debugMode.toString());
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}default_volume`, settings.defaultVolume.toString());
-      localStorage.setItem(`${STORAGE_KEY_PREFIX}audio_profile`, settings.audioProfile);
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}ai_api_key`,
+        settings.aiApiKey
+      );
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}ai_provider`,
+        settings.aiProvider
+      );
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}auto_switch`,
+        settings.autoSwitch.toString()
+      );
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}desktop_notifications`,
+        settings.desktopNotifications.toString()
+      );
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}debug_mode`,
+        settings.debugMode.toString()
+      );
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}default_volume`,
+        settings.defaultVolume.toString()
+      );
+      localStorage.setItem(
+        `${STORAGE_KEY_PREFIX}audio_profile`,
+        settings.audioProfile
+      );
 
       // Simulate async save
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -137,7 +228,8 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Erro ao salvar configurações:", error);
       toast.error("Erro ao salvar configurações", {
-        description: "Tente novamente ou verifique o console para mais detalhes.",
+        description:
+          "Tente novamente ou verifique o console para mais detalhes.",
       });
     } finally {
       setIsSaving(false);
@@ -151,8 +243,12 @@ export default function SettingsPage() {
     <div className="space-y-6 pb-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Configurações</h1>
-        <p className="text-muted-foreground mt-1">Personalize o comportamento do gerenciador de headsets.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          Configurações
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Personalize o comportamento do gerenciador de headsets.
+        </p>
       </div>
 
       <div className="grid gap-6">
@@ -163,13 +259,19 @@ export default function SettingsPage() {
               <Sparkles className="h-5 w-5" />
               Integração de IA
             </CardTitle>
-            <CardDescription>Configure o provedor de IA para diagnósticos inteligentes e análise de logs.</CardDescription>
+            <CardDescription>
+              Configure o provedor de IA para diagnósticos inteligentes e
+              análise de logs.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               {/* AI Provider */}
               <div className="space-y-2">
-                <Label htmlFor="ai-provider" className="flex items-center gap-2">
+                <Label
+                  htmlFor="ai-provider"
+                  className="flex items-center gap-2"
+                >
                   Provedor de IA
                   <TooltipProvider>
                     <Tooltip>
@@ -177,21 +279,31 @@ export default function SettingsPage() {
                         <Info className="h-3 w-3 text-muted-foreground cursor-help" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="max-w-xs">Escolha o modelo de IA para análise de logs e sugestões de troubleshooting</p>
+                        <p className="max-w-xs">
+                          Escolha o modelo de IA para análise de logs e
+                          sugestões de troubleshooting
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </Label>
-                <Select value={settings.aiProvider} onValueChange={(value) => updateSetting("aiProvider", value as Settings["aiProvider"])}>
+                <Select
+                  value={settings.aiProvider}
+                  onValueChange={value =>
+                    updateSetting("aiProvider", value as Settings["aiProvider"])
+                  }
+                >
                   <SelectTrigger id="ai-provider">
                     <SelectValue placeholder="Selecione o provedor" />
                   </SelectTrigger>
                   <SelectContent>
-                    {AI_PROVIDERS.map((provider) => (
+                    {AI_PROVIDERS.map(provider => (
                       <SelectItem key={provider.value} value={provider.value}>
                         <div className="flex flex-col">
                           <span>{provider.label}</span>
-                          <span className="text-[10px] text-muted-foreground">{provider.description}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {provider.description}
+                          </span>
                         </div>
                       </SelectItem>
                     ))}
@@ -203,17 +315,19 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="api-key" className="flex items-center gap-2">
                   API Key
-                  {isApiKeyConfigured && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+                  {isApiKeyConfigured && (
+                    <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  )}
                 </Label>
                 <div className="relative">
                   <Key className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
+                  <Input
                     id="api-key"
                     type={apiKeyVisible ? "text" : "password"}
                     placeholder={`sk-${settings.aiProvider === "anthropic" ? "ant-" : ""}...`}
-                    className="pl-9" 
+                    className="pl-9"
                     value={settings.aiApiKey}
-                    onChange={(e) => updateSetting("aiApiKey", e.target.value)}
+                    onChange={e => updateSetting("aiApiKey", e.target.value)}
                   />
                   <Button
                     type="button"
@@ -227,7 +341,8 @@ export default function SettingsPage() {
                 </div>
                 <p className="text-[10px] text-muted-foreground flex items-start gap-1">
                   <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
-                  Sua chave é armazenada localmente no navegador e nunca é enviada para nossos servidores.
+                  Sua chave é armazenada localmente no navegador e nunca é
+                  enviada para nossos servidores.
                 </p>
               </div>
             </div>
@@ -238,7 +353,10 @@ export default function SettingsPage() {
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-medium">Assistente de IA desativado</p>
-                  <p className="text-xs mt-1">Configure uma API Key para habilitar diagnósticos inteligentes</p>
+                  <p className="text-xs mt-1">
+                    Configure uma API Key para habilitar diagnósticos
+                    inteligentes
+                  </p>
                 </div>
               </div>
             )}
@@ -249,48 +367,70 @@ export default function SettingsPage() {
         <Card className="border-white/10 bg-card/50 backdrop-blur-md">
           <CardHeader>
             <CardTitle>Comportamento Geral</CardTitle>
-            <CardDescription>Como o gerenciador deve reagir a novos dispositivos.</CardDescription>
+            <CardDescription>
+              Como o gerenciador deve reagir a novos dispositivos.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="auto-switch" className="text-base cursor-pointer">Auto-Switch</Label>
+                <Label
+                  htmlFor="auto-switch"
+                  className="text-base cursor-pointer"
+                >
+                  Auto-Switch
+                </Label>
                 <p className="text-sm text-muted-foreground">
                   Mudar automaticamente a saída de áudio ao conectar um headset.
                 </p>
               </div>
-              <Switch 
+              <Switch
                 id="auto-switch"
-                checked={settings.autoSwitch} 
-                onCheckedChange={(checked) => updateSetting("autoSwitch", checked)}
+                checked={settings.autoSwitch}
+                onCheckedChange={checked =>
+                  updateSetting("autoSwitch", checked)
+                }
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="desktop-notifications" className="text-base cursor-pointer">Notificações Desktop</Label>
+                <Label
+                  htmlFor="desktop-notifications"
+                  className="text-base cursor-pointer"
+                >
+                  Notificações Desktop
+                </Label>
                 <p className="text-sm text-muted-foreground">
-                  Mostrar pop-ups quando dispositivos forem conectados/desconectados.
+                  Mostrar pop-ups quando dispositivos forem
+                  conectados/desconectados.
                 </p>
               </div>
-              <Switch 
+              <Switch
                 id="desktop-notifications"
                 checked={settings.desktopNotifications}
-                onCheckedChange={(checked) => updateSetting("desktopNotifications", checked)}
+                onCheckedChange={checked =>
+                  updateSetting("desktopNotifications", checked)
+                }
               />
             </div>
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="debug-mode" className="text-base cursor-pointer">Modo Debug</Label>
+                <Label
+                  htmlFor="debug-mode"
+                  className="text-base cursor-pointer"
+                >
+                  Modo Debug
+                </Label>
                 <p className="text-sm text-muted-foreground">
                   Gerar logs detalhados para solução de problemas.
                 </p>
               </div>
-              <Switch 
+              <Switch
                 id="debug-mode"
                 checked={settings.debugMode}
-                onCheckedChange={(checked) => updateSetting("debugMode", checked)}
+                onCheckedChange={checked => updateSetting("debugMode", checked)}
               />
             </div>
           </CardContent>
@@ -300,40 +440,59 @@ export default function SettingsPage() {
         <Card className="border-white/10 bg-card/50 backdrop-blur-md">
           <CardHeader>
             <CardTitle>Áudio Padrão</CardTitle>
-            <CardDescription>Definições iniciais para novos dispositivos desconhecidos.</CardDescription>
+            <CardDescription>
+              Definições iniciais para novos dispositivos desconhecidos.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-2">
               <Label htmlFor="default-volume">Volume Inicial (%)</Label>
               <div className="flex gap-4 items-center">
-                <Input 
+                <Input
                   id="default-volume"
-                  type="number" 
+                  type="number"
                   min={0}
                   max={100}
                   value={settings.defaultVolume}
-                  onChange={(e) => updateSetting("defaultVolume", parseInt(e.target.value, 10) || 0)}
-                  className="max-w-[100px]" 
+                  onChange={e =>
+                    updateSetting(
+                      "defaultVolume",
+                      parseInt(e.target.value, 10) || 0
+                    )
+                  }
+                  className="max-w-[100px]"
                 />
-                <p className="text-sm text-muted-foreground">Recomendado: 50-70%</p>
+                <p className="text-sm text-muted-foreground">
+                  Recomendado: 50-70%
+                </p>
               </div>
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="audio-profile">Perfil de Áudio Padrão</Label>
-              <Select 
-                value={settings.audioProfile} 
-                onValueChange={(value) => updateSetting("audioProfile", value as Settings["audioProfile"])}
+              <Select
+                value={settings.audioProfile}
+                onValueChange={value =>
+                  updateSetting(
+                    "audioProfile",
+                    value as Settings["audioProfile"]
+                  )
+                }
               >
-                <SelectTrigger id="audio-profile" className="w-full md:w-[320px]">
+                <SelectTrigger
+                  id="audio-profile"
+                  className="w-full md:w-[320px]"
+                >
                   <SelectValue placeholder="Selecione um perfil" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AUDIO_PROFILES.map((profile) => (
+                  {AUDIO_PROFILES.map(profile => (
                     <SelectItem key={profile.value} value={profile.value}>
                       <div className="flex flex-col">
                         <span>{profile.label}</span>
-                        <span className="text-[10px] text-muted-foreground">{profile.description}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {profile.description}
+                        </span>
                       </div>
                     </SelectItem>
                   ))}
@@ -348,7 +507,7 @@ export default function SettingsPage() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button 
+                <Button
                   onClick={handleSave}
                   disabled={!hasChanges || isSaving}
                   className={cn(
@@ -361,7 +520,11 @@ export default function SettingsPage() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{hasChanges ? "Clique para salvar as alterações" : "Nenhuma alteração pendente"}</p>
+                <p>
+                  {hasChanges
+                    ? "Clique para salvar as alterações"
+                    : "Nenhuma alteração pendente"}
+                </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

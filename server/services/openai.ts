@@ -50,13 +50,21 @@ Responda SEMPRE em português brasileiro e em formato JSON válido.`;
 **Logs do Sistema:**
 ${request.logs.join("\n")}
 
-${request.deviceInfo ? `**Informações do Dispositivo:**
+${
+  request.deviceInfo
+    ? `**Informações do Dispositivo:**
 - Fabricante: ${request.deviceInfo.manufacturer || "Desconhecido"}
 - Driver: ${request.deviceInfo.driver || "Desconhecido"}
-- Label: ${request.deviceInfo.label || "Desconhecido"}` : ""}
+- Label: ${request.deviceInfo.label || "Desconhecido"}`
+    : ""
+}
 
-${request.errorContext ? `**Contexto do Erro:**
-${request.errorContext}` : ""}
+${
+  request.errorContext
+    ? `**Contexto do Erro:**
+${request.errorContext}`
+    : ""
+}
 
 Analise esses logs e forneça um diagnóstico detalhado.
 `;
@@ -82,7 +90,8 @@ Analise esses logs e forneça um diagnóstico detalhado.
     const parsed = JSON.parse(responseText);
 
     return {
-      diagnosis: parsed.diagnosis || parsed.diagnostico || "Diagnóstico não disponível",
+      diagnosis:
+        parsed.diagnosis || parsed.diagnostico || "Diagnóstico não disponível",
       suggestedActions: parsed.suggestedActions || parsed.acoesSugeridas || [],
       severity: parsed.severity || parsed.severidade || "medium",
       confidence: parsed.confidence || parsed.confianca || 50,

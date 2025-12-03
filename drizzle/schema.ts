@@ -1,4 +1,13 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json } from "drizzle-orm/mysql-core";
+import {
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  boolean,
+  json,
+} from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -53,7 +62,11 @@ export const audioTests = mysqlTable("audio_tests", {
   userId: int("userId").notNull(),
   deviceId: int("deviceId"), // Reference to audioDevices.id
   deviceLabel: varchar("deviceLabel", { length: 255 }), // Device name for reference
-  testType: mysqlEnum("testType", ["recording", "noise_cancellation", "spectrum_analysis"]).notNull(),
+  testType: mysqlEnum("testType", [
+    "recording",
+    "noise_cancellation",
+    "spectrum_analysis",
+  ]).notNull(),
   duration: int("duration"), // Duration in seconds
   spectrumData: json("spectrumData"), // JSON array of frequency data
   noiseLevel: int("noiseLevel"), // Average noise level (0-255)
@@ -89,17 +102,25 @@ export const troubleshootingScripts = mysqlTable("troubleshooting_scripts", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  category: mysqlEnum("category", ["driver", "audio", "system", "network"]).notNull(),
+  category: mysqlEnum("category", [
+    "driver",
+    "audio",
+    "system",
+    "network",
+  ]).notNull(),
   command: text("command").notNull(), // Shell command to execute
   requiresRoot: boolean("requiresRoot").default(false),
-  platform: mysqlEnum("platform", ["linux", "windows", "all"]).default("all").notNull(),
+  platform: mysqlEnum("platform", ["linux", "windows", "all"])
+    .default("all")
+    .notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type TroubleshootingScript = typeof troubleshootingScripts.$inferSelect;
-export type InsertTroubleshootingScript = typeof troubleshootingScripts.$inferInsert;
+export type InsertTroubleshootingScript =
+  typeof troubleshootingScripts.$inferInsert;
 
 /**
  * Execution history of troubleshooting scripts
@@ -108,7 +129,12 @@ export const scriptExecutions = mysqlTable("script_executions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   scriptId: int("scriptId").notNull(), // Reference to troubleshootingScripts.id
-  status: mysqlEnum("status", ["pending", "running", "success", "failed"]).notNull(),
+  status: mysqlEnum("status", [
+    "pending",
+    "running",
+    "success",
+    "failed",
+  ]).notNull(),
   output: text("output"), // Command output
   errorMessage: text("errorMessage"),
   executionTime: int("executionTime"), // Duration in milliseconds

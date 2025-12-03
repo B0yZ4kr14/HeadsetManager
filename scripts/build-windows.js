@@ -99,12 +99,7 @@ const builderConfig = {
     output: "dist-installers",
     buildResources: "electron/assets",
   },
-  files: [
-    "dist/**/*",
-    "electron/main.js",
-    "package.json",
-    "node_modules/**/*",
-  ],
+  files: ["dist/**/*", "electron/main.js", "package.json", "node_modules/**/*"],
   win: {
     target: ["msi"],
     icon: "electron/assets/icon.ico",
@@ -137,9 +132,12 @@ try {
 // Step 5: Build the installer
 console.log("🏗️  Step 5: Building .msi installer...");
 try {
-  execSync("pnpm exec electron-builder --win --x64 --config electron-builder.json", {
-    stdio: "inherit",
-  });
+  execSync(
+    "pnpm exec electron-builder --win --x64 --config electron-builder.json",
+    {
+      stdio: "inherit",
+    }
+  );
   console.log("\n✅ Windows installer built successfully!");
   console.log("📦 Output: dist-installers/HeadsetManager-Setup.msi\n");
 } catch (error) {

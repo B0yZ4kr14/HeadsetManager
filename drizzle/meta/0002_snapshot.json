@@ -77,9 +77,7 @@
       "compositePrimaryKeys": {
         "ai_diagnostics_id": {
           "name": "ai_diagnostics_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -174,9 +172,7 @@
       "compositePrimaryKeys": {
         "audio_devices_id": {
           "name": "audio_devices_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -276,9 +272,7 @@
       "compositePrimaryKeys": {
         "audio_tests_id": {
           "name": "audio_tests_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -357,9 +351,7 @@
       "compositePrimaryKeys": {
         "script_executions_id": {
           "name": "script_executions_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -424,9 +416,7 @@
       "compositePrimaryKeys": {
         "system_logs_id": {
           "name": "system_logs_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -517,9 +507,7 @@
       "compositePrimaryKeys": {
         "troubleshooting_scripts_id": {
           "name": "troubleshooting_scripts_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {},
@@ -602,17 +590,13 @@
       "compositePrimaryKeys": {
         "users_id": {
           "name": "users_id",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {
         "users_openId_unique": {
           "name": "users_openId_unique",
-          "columns": [
-            "openId"
-          ]
+          "columns": ["openId"]
         }
       },
       "checkConstraint": {}

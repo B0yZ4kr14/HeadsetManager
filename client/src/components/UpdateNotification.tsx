@@ -83,19 +83,11 @@ export function UpdateNotification() {
           )}
 
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={handleDownload}
-              className="flex-1"
-            >
+            <Button size="sm" onClick={handleDownload} className="flex-1">
               <ExternalLink className="h-3 w-3 mr-1" />
               Baixar Atualização
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleDismiss}
-            >
+            <Button size="sm" variant="outline" onClick={handleDismiss}>
               Depois
             </Button>
           </div>

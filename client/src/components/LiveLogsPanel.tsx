@@ -38,8 +38,11 @@ export function LiveLogsPanel() {
     (log: SystemLog) => {
       if (isPaused) return;
 
-      setLogs((prev) => {
-        const newLogs = [{ ...log, timestamp: new Date(log.timestamp) }, ...prev];
+      setLogs(prev => {
+        const newLogs = [
+          { ...log, timestamp: new Date(log.timestamp) },
+          ...prev,
+        ];
         return newLogs.slice(0, maxLogs);
       });
     },
@@ -58,19 +61,21 @@ export function LiveLogsPanel() {
 
     // Format logs as text
     const logText = logs
-      .map((log) => {
+      .map(log => {
         const timestamp = log.timestamp.toLocaleString("pt-BR");
         const header = `[${timestamp}] [${log.level.toUpperCase()}] [${log.source}]`;
         const message = log.message;
-        const details = log.details ? `\nDetalhes: ${JSON.stringify(log.details, null, 2)}` : "";
+        const details = log.details
+          ? `\nDetalhes: ${JSON.stringify(log.details, null, 2)}`
+          : "";
         return `${header}\n${message}${details}`;
       })
       .join("\n\n" + "=".repeat(80) + "\n\n");
 
     // Add header
-    const header = `Headset Manager - Exportação de Logs\nData: ${new Date().toLocaleString("pt-BR")}\nTotal de logs: ${logs.length}\n${
-      "=".repeat(80)
-    }\n\n`;
+    const header = `Headset Manager - Exportação de Logs\nData: ${new Date().toLocaleString("pt-BR")}\nTotal de logs: ${logs.length}\n${"=".repeat(
+      80
+    )}\n\n`;
 
     const fullText = header + logText;
 
@@ -105,7 +110,11 @@ export function LiveLogsPanel() {
               onClick={togglePause}
               title={isPaused ? "Retomar" : "Pausar"}
             >
-              {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+              {isPaused ? (
+                <Play className="h-3 w-3" />
+              ) : (
+                <Pause className="h-3 w-3" />
+              )}
             </Button>
             <Button
               variant="ghost"
@@ -149,7 +158,9 @@ export function LiveLogsPanel() {
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
                       <span className="text-base">{levelIcons[log.level]}</span>
-                      <Badge className={cn("text-[10px]", levelColors[log.level])}>
+                      <Badge
+                        className={cn("text-[10px]", levelColors[log.level])}
+                      >
                         {log.level.toUpperCase()}
                       </Badge>
                       <span className="text-xs text-muted-foreground font-mono">
@@ -160,7 +171,9 @@ export function LiveLogsPanel() {
                       {log.timestamp.toLocaleTimeString("pt-BR")}
                     </span>
                   </div>
-                  <p className="text-foreground/90 leading-relaxed">{log.message}</p>
+                  <p className="text-foreground/90 leading-relaxed">
+                    {log.message}
+                  </p>
                   {log.details && (
                     <pre className="mt-2 text-[10px] bg-black/30 p-2 rounded overflow-x-auto text-green-400 font-mono">
                       {JSON.stringify(log.details, null, 2)}

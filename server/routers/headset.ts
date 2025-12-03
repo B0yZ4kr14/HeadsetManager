@@ -19,7 +19,11 @@ import { storagePut } from "../storage";
 import { exec } from "child_process";
 import { promisify } from "util";
 import { analyzeLogsWithAI, suggestTroubleshooting } from "../services/openai";
-import { emitSystemLog, emitScriptExecution, emitAIDiagnostic } from "../services/socket";
+import {
+  emitSystemLog,
+  emitScriptExecution,
+  emitAIDiagnostic,
+} from "../services/socket";
 
 const execAsync = promisify(exec);
 
@@ -57,7 +61,11 @@ export const headsetRouter = router({
       .input(
         z.object({
           deviceId: z.number().optional(),
-          testType: z.enum(["recording", "noise_cancellation", "spectrum_analysis"]),
+          testType: z.enum([
+            "recording",
+            "noise_cancellation",
+            "spectrum_analysis",
+          ]),
           duration: z.number().optional(),
           audioBlob: z.string().optional(), // Base64 encoded audio
           spectrumData: z.any().optional(),
@@ -105,7 +113,7 @@ export const headsetRouter = router({
           userId: ctx.user.id,
           ...input,
         });
-        
+
         // Emit log via WebSocket
         emitSystemLog({
           level: input.level,
@@ -113,7 +121,7 @@ export const headsetRouter = router({
           message: input.message,
           details: input.details,
         });
-        
+
         return { success: true };
       }),
 
@@ -136,7 +144,7 @@ export const headsetRouter = router({
       .input(z.object({ scriptId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const scripts = await getTroubleshootingScripts();
-        const script = scripts.find((s) => s.id === input.scriptId);
+        const script = scripts.find(s => s.id === input.scriptId);
 
         if (!script) {
           throw new Error("Script not found");
@@ -222,11 +230,13 @@ export const headsetRouter = router({
         z.object({
           apiKey: z.string(),
           logs: z.array(z.string()),
-          deviceInfo: z.object({
-            manufacturer: z.string().optional(),
-            driver: z.string().optional(),
-            label: z.string().optional(),
-          }).optional(),
+          deviceInfo: z
+            .object({
+              manufacturer: z.string().optional(),
+              driver: z.string().optional(),
+              label: z.string().optional(),
+            })
+            .optional(),
           errorContext: z.string().optional(),
         })
       )
@@ -257,7 +267,7 @@ export const headsetRouter = router({
             confidence: analysis.confidence,
           });
 
-          return { 
+          return {
             response,
             analysis,
           };
@@ -275,7 +285,10 @@ export const headsetRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         try {
-          const suggestions = await suggestTroubleshooting(input.apiKey, input.symptoms);
+          const suggestions = await suggestTroubleshooting(
+            input.apiKey,
+            input.symptoms
+          );
           return { suggestions };
         } catch (error: any) {
           throw new Error(`Erro ao gerar sugestões: ${error.message}`);

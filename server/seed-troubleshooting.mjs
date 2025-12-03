@@ -9,7 +9,8 @@ const db = drizzle(process.env.DATABASE_URL);
 const scripts = [
   {
     name: "Reiniciar PulseAudio",
-    description: "Reinicia o servidor de áudio PulseAudio para resolver problemas de conexão",
+    description:
+      "Reinicia o servidor de áudio PulseAudio para resolver problemas de conexão",
     category: "audio",
     command: "pulseaudio -k && pulseaudio --start",
     requiresRoot: false,
@@ -36,7 +37,8 @@ const scripts = [
   },
   {
     name: "Verificar Logs do Kernel (dmesg)",
-    description: "Exibe as últimas 50 linhas do log do kernel relacionadas a USB e áudio",
+    description:
+      "Exibe as últimas 50 linhas do log do kernel relacionadas a USB e áudio",
     category: "system",
     command: "dmesg | grep -iE 'usb|audio' | tail -n 50",
     requiresRoot: false,
@@ -63,7 +65,8 @@ const scripts = [
   },
   {
     name: "Resetar Configurações do PulseAudio",
-    description: "Remove as configurações do usuário e reinicia o PulseAudio com padrões",
+    description:
+      "Remove as configurações do usuário e reinicia o PulseAudio com padrões",
     category: "audio",
     command: "rm -rf ~/.config/pulse && pulseaudio -k && pulseaudio --start",
     requiresRoot: false,
@@ -83,7 +86,8 @@ const scripts = [
     name: "Testar Microfone (arecord)",
     description: "Grava 5 segundos de áudio do microfone padrão para teste",
     category: "audio",
-    command: "arecord -d 5 -f cd /tmp/test-mic.wav && echo 'Gravação salva em /tmp/test-mic.wav'",
+    command:
+      "arecord -d 5 -f cd /tmp/test-mic.wav && echo 'Gravação salva em /tmp/test-mic.wav'",
     requiresRoot: false,
     platform: "linux",
     isActive: true,
@@ -101,7 +105,7 @@ const scripts = [
 
 async function seed() {
   console.log("🌱 Seeding troubleshooting scripts...");
-  
+
   try {
     for (const script of scripts) {
       await db.insert(troubleshootingScripts).values(script);
@@ -112,7 +116,7 @@ async function seed() {
     console.error("❌ Seeding failed:", error);
     process.exit(1);
   }
-  
+
   process.exit(0);
 }
 
