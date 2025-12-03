@@ -1,31 +1,37 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Headphones, Terminal, FileText, Settings, Menu, X } from "lucide-react";
+import { Headphones, Terminal, FileText, Settings, Menu, X, Sun, Moon, HelpCircle } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import BrandLogo from "@/components/BrandLogo";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Headphones },
     { href: "/terminal", label: "Terminal & Logs", icon: Terminal },
     { href: "/docs", label: "Documentação", icon: FileText },
     { href: "/settings", label: "Configurações", icon: Settings },
+    { href: "/help", label: "Ajuda", icon: HelpCircle },
   ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row font-sans">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="TSI Telecom" className="h-8 w-auto object-contain" />
-          <span className="font-bold text-lg tracking-tight text-foreground">TSI Telecom</span>
+        <BrandLogo variant="mobile" />
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+            {isMobileMenuOpen ? <X /> : <Menu />}
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          {isMobileMenuOpen ? <X /> : <Menu />}
-        </Button>
       </div>
 
       {/* Sidebar Navigation */}
@@ -35,11 +41,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       )}>
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-sidebar-border hidden md:flex items-center gap-3">
-            <img src="/logo.png" alt="TSI Telecom" className="h-10 w-auto object-contain" />
-            <div className="flex flex-col justify-center">
-              <h1 className="font-bold text-lg tracking-tight leading-none text-sidebar-foreground">TSI Telecom</h1>
-              <span className="text-[10px] font-medium text-primary uppercase tracking-wider mt-1">Headset Manager</span>
-            </div>
+            <BrandLogo variant="sidebar" />
           </div>
 
           <nav className="flex-1 p-4 space-y-1">
@@ -59,7 +61,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="p-6 border-t border-sidebar-border">
+          <div className="p-6 border-t border-sidebar-border space-y-4">
+            <div className="flex items-center justify-between px-2">
+              <span className="text-xs font-medium text-sidebar-foreground/70">TEMA</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              </Button>
+            </div>
             <div className="bg-sidebar-accent/50 p-4 rounded-md border border-sidebar-border text-xs font-mono text-sidebar-foreground/70">
               <div className="flex justify-between mb-2">
                 <span>STATUS</span>
