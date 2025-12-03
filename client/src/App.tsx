@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import TerminalPage from "./pages/Terminal";
 import DocsPage from "./pages/Docs";
 import DiagnosticsPage from "./pages/Diagnostics";
+import RecordingsHistory from "./pages/RecordingsHistory";
 import Settings from "./pages/Settings";
 import Help from "./pages/Help";
 function Router() {
@@ -19,6 +20,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/terminal" component={TerminalPage} />
         <Route path="/diagnostics" component={DiagnosticsPage} />
+        <Route path="/recordings" component={RecordingsHistory} />
         <Route path="/docs" component={DocsPage} />
         <Route path="/settings" component={Settings} />
         <Route path="/help" component={Help} />

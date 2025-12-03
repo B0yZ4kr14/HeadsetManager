@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Mic, Play, Square, Download, Activity, Volume2, RefreshCw, Info, AlertCircle, Timer, Cpu, Sparkles } from "lucide-react";
+import { Mic, Play, Square, Download, Activity, Volume2, RefreshCw, Info, AlertCircle, Timer, Cpu, Sparkles, Save, FileAudio } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
@@ -220,19 +221,11 @@ export default function Home() {
         stream.getTracks().forEach(track => track.stop());
         streamRef.current = null;
         
-        // Save to database
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64Audio = reader.result?.toString().split(',')[1];
-          if (base64Audio) {
-            saveRecordingMutation.mutate({
-              testType: "recording",
-              duration: recordingTime,
-              audioBlob: base64Audio,
-            });
-          }
-        };
-        reader.readAsDataURL(audioBlob);
+        // Save metadata to database (no audio file)
+        saveRecordingMutation.mutate({
+          testType: "recording",
+          duration: recordingTime,
+        });
         
         // Auto-play after recording
         const audio = new Audio(url);
@@ -392,26 +385,49 @@ export default function Home() {
               )}
             </div>
 
-            <div className="flex gap-3 flex-wrap">
-              {!isRecording ? (
-                <Button onClick={startRecording} className="flex-1 h-12 text-base shadow-lg shadow-primary/20" variant="default">
-                  <Mic className="mr-2 h-5 w-5" /> Iniciar Gravação
-                </Button>
-              ) : (
-                <Button onClick={stopRecording} className="flex-1 h-12 text-base animate-pulse bg-destructive hover:bg-destructive/90 text-white shadow-lg shadow-destructive/20">
-                  <Square className="mr-2 h-5 w-5" /> Parar ({formatTime(recordingTime)})
-                </Button>
-              )}
-              
-              <Button 
-                onClick={toggleNoiseTest} 
-                variant={isNoiseTestActive ? "destructive" : "secondary"}
-                className="flex-1 h-12 text-base backdrop-blur-sm"
-              >
-                <Volume2 className="mr-2 h-5 w-5" />
-                {isNoiseTestActive ? "Parar Ruído" : "Teste de Ruído"}
-              </Button>
-            </div>
+            <TooltipProvider>
+              <div className="flex gap-3 flex-wrap">
+                {!isRecording ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button onClick={startRecording} className="flex-1 h-12 text-base shadow-lg shadow-primary/20" variant="default">
+                        <Mic className="mr-2 h-5 w-5" /> Iniciar Gravação
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Gravar áudio do microfone selecionado</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button onClick={stopRecording} className="flex-1 h-12 text-base animate-pulse bg-destructive hover:bg-destructive/90 text-white shadow-lg shadow-destructive/20">
+                        <Square className="mr-2 h-5 w-5" /> Parar ({formatTime(recordingTime)})
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Finalizar gravação em andamento</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      onClick={toggleNoiseTest} 
+                      variant={isNoiseTestActive ? "destructive" : "secondary"}
+                      className="flex-1 h-12 text-base backdrop-blur-sm"
+                    >
+                      <Volume2 className="mr-2 h-5 w-5" />
+                      {isNoiseTestActive ? "Parar Ruído" : "Teste de Ruído"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isNoiseTestActive ? "Desativar teste de ruído branco" : "Testar cancelamento de ruído com white noise"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
           </CardContent>
         </Card>
 
@@ -447,15 +463,33 @@ export default function Home() {
                     <span className="text-xs font-medium text-muted-foreground">Última Gravação</span>
                     <span className="text-xs text-primary">{formatTime(recordingTime)}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" className="flex-1" variant="outline" onClick={playAudio} disabled={isPlaying}>
-                      {isPlaying ? <Activity className="h-3 w-3 animate-pulse mr-1" /> : <Play className="h-3 w-3 mr-1" />}
-                      Reproduzir
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={downloadAudio}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <TooltipProvider>
+                    <div className="flex gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button size="sm" className="flex-1" variant="outline" onClick={playAudio} disabled={isPlaying}>
+                            {isPlaying ? <Activity className="h-3 w-3 animate-pulse mr-1" /> : <Play className="h-3 w-3 mr-1" />}
+                            Reproduzir
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Ouvir a gravação de áudio</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button size="sm" variant="default" className="shadow-md" onClick={downloadAudio}>
+                            <Save className="h-4 w-4 mr-1" />
+                            Salvar
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Salvar gravação no seu computador</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
                 </div>
               )}
             </CardContent>

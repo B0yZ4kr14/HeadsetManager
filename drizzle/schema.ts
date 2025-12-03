@@ -52,11 +52,12 @@ export const audioTests = mysqlTable("audio_tests", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   deviceId: int("deviceId"), // Reference to audioDevices.id
+  deviceLabel: varchar("deviceLabel", { length: 255 }), // Device name for reference
   testType: mysqlEnum("testType", ["recording", "noise_cancellation", "spectrum_analysis"]).notNull(),
   duration: int("duration"), // Duration in seconds
-  audioUrl: text("audioUrl"), // S3 URL for the recorded audio
   spectrumData: json("spectrumData"), // JSON array of frequency data
   noiseLevel: int("noiseLevel"), // Average noise level (0-255)
+  peakFrequency: int("peakFrequency"), // Peak frequency detected (Hz)
   quality: mysqlEnum("quality", ["excellent", "good", "fair", "poor"]),
   notes: text("notes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

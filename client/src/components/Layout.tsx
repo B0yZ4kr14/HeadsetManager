@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Headphones, Terminal, FileText, Settings, Menu, X, HelpCircle, Wrench } from "lucide-react";
+import { Headphones, Terminal, FileText, Settings, Menu, X, HelpCircle, Wrench, History } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/BrandLogo";
@@ -13,6 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: "/", label: "Dashboard", icon: Headphones },
     { href: "/terminal", label: "Terminal & Logs", icon: Terminal },
     { href: "/diagnostics", label: "Diagnósticos", icon: Wrench },
+    { href: "/recordings", label: "Histórico", icon: History },
     { href: "/docs", label: "Documentação", icon: FileText },
     { href: "/settings", label: "Configurações", icon: Settings },
     { href: "/help", label: "Ajuda", icon: HelpCircle },

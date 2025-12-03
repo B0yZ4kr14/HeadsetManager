@@ -46,3 +46,12 @@
 - [x] Persistir gravações de áudio no banco de dados (auto-save após gravação)
 - [x] Otimizar código e remover redundâncias (CSS limpo, imports organizados)
 - [x] Melhorias UX profissionais (spacing, hierarquia, micro-interações)
+
+## Correções Solicitadas 🔧
+
+- [x] Remover upload automático de gravações para S3
+- [x] Manter apenas metadados de gravações no banco (sem arquivo de áudio)
+- [x] Adicionar botão de download para salvar gravação localmente (botão "Salvar")
+- [x] Criar interface amigável com botões intuitivos e ícones claros
+- [x] Implementar histórico de gravações para consulta e manutenção preventiva (/recordings)
+- [x] Melhorar tooltips e labels para usuários leigos (TooltipProvider em todos os botões)

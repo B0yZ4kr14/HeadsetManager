@@ -67,30 +67,19 @@ export const headsetRouter = router({
         })
       )
       .mutation(async ({ ctx, input }) => {
-        let audioUrl: string | undefined;
-
-        // Upload audio to S3 if provided
-        if (input.audioBlob) {
-          const buffer = Buffer.from(input.audioBlob, "base64");
-          const timestamp = Date.now();
-          const fileKey = `audio-tests/${ctx.user.id}/${timestamp}.webm`;
-          const result = await storagePut(fileKey, buffer, "audio/webm");
-          audioUrl = result.url;
-        }
-
+        // Save only metadata to database (no audio file upload)
         await createAudioTest({
           userId: ctx.user.id,
           deviceId: input.deviceId,
           testType: input.testType,
           duration: input.duration,
-          audioUrl,
           spectrumData: input.spectrumData,
           noiseLevel: input.noiseLevel,
           quality: input.quality,
           notes: input.notes,
         });
 
-        return { success: true, audioUrl };
+        return { success: true };
       }),
 
     list: protectedProcedure
