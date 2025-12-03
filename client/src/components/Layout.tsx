@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Headphones, Terminal, FileText, Settings, Menu, X, Sun, Moon, HelpCircle } from "lucide-react";
+import { Headphones, Terminal, FileText, Settings, Menu, X, Sun, Moon, HelpCircle, Wrench } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/", label: "Dashboard", icon: Headphones },
     { href: "/terminal", label: "Terminal & Logs", icon: Terminal },
+    { href: "/diagnostics", label: "Diagnósticos", icon: Wrench },
     { href: "/docs", label: "Documentação", icon: FileText },
     { href: "/settings", label: "Configurações", icon: Settings },
     { href: "/help", label: "Ajuda", icon: HelpCircle },
