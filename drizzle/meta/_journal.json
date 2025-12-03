@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1764722651291,
+      "tag": "0000_rich_misty_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1764722740832,
+      "tag": "0001_tearful_namora",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1764724419706,
+      "tag": "0002_watery_exodus",
+      "breakpoints": true
+    }
+  ]
+}
