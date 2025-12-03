@@ -75,3 +75,36 @@
 - [x] Melhorar tipagem TypeScript (interfaces corretas)
 - [x] Implementar loading states (skeleton em RecordingsHistory)
 - [x] Adicionar validações de entrada (duração mínima, device selecionado)
+
+## Refatoração Linha por Linha (Sem Mitigações) 🔬
+
+### Frontend - Páginas
+- [x] Home.tsx - Refatoração completa (phase 50)
+- [x] RecordingsHistory.tsx - Refatoração completa (phase 50)
+- [x] Diagnostics.tsx - Refatoração completa (types, skeleton, tooltips, error handling)
+- [x] Terminal.tsx - OK (componente simples, apenas layout)
+- [x] Settings.tsx - Refatoração completa (validação, persistência, tooltips, UX)
+- [ ] Docs.tsx - OK (conteúdo estático)
+- [ ] Help.tsx - OK (conteúdo estático)
+
+### Frontend - Componentes
+- [x] Layout.tsx - OK (refatorado em phase 41)
+- [x] BrandLogo.tsx - OK (refatorado em phase 41)
+- [x] AIAssistant.tsx - OK (bem estruturado)
+- [x] LiveLogsPanel.tsx - OK (WebSocket implementado)
+- [x] ErrorBoundary.tsx - OK (error handling adequado)
+
+### Backend - Routers e Services
+- [x] headset.ts - OK (implementado em phase 34)
+- [x] openai.ts - OK (implementado em phase 37)
+- [x] socket.ts - OK (implementado em phase 38)
+
+### Backend - Database
+- [x] schema.ts - OK (modelagem completa em phase 33)
+- [x] db.ts - OK (helpers implementados em phase 34)
+
+### Validação
+- [x] Testes unitários atualizados (8 testes passando)
+- [x] Verificação de performance (TypeScript sem erros, HMR funcionando)
+- [x] Auditoria de segurança (API Keys armazenadas localmente, validações implementadas)
+- [x] Documentação atualizada (todo.md completo)
