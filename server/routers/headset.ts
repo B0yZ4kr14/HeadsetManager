@@ -18,6 +18,8 @@ import {
 import { storagePut } from "../storage";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { analyzeLogsWithAI, suggestTroubleshooting } from "../services/openai";
+import { emitSystemLog, emitScriptExecution, emitAIDiagnostic } from "../services/socket";
 
 const execAsync = promisify(exec);
 
@@ -114,6 +116,15 @@ export const headsetRouter = router({
           userId: ctx.user.id,
           ...input,
         });
+        
+        // Emit log via WebSocket
+        emitSystemLog({
+          level: input.level,
+          source: input.source,
+          message: input.message,
+          details: input.details,
+        });
+        
         return { success: true };
       }),
 
@@ -169,6 +180,15 @@ export const headsetRouter = router({
             completedAt: new Date(),
           });
 
+          // Emit success via WebSocket
+          emitScriptExecution({
+            scriptId: input.scriptId,
+            scriptName: script.name,
+            status: "success",
+            output: stdout || stderr,
+            executionTime,
+          });
+
           return {
             success: true,
             output: stdout || stderr,
@@ -183,6 +203,16 @@ export const headsetRouter = router({
             output: error.stdout || error.stderr,
             executionTime,
             completedAt: new Date(),
+          });
+
+          // Emit failure via WebSocket
+          emitScriptExecution({
+            scriptId: input.scriptId,
+            scriptName: script.name,
+            status: "failed",
+            errorMessage: error.message,
+            output: error.stdout || error.stderr,
+            executionTime,
           });
 
           throw new Error(`Script execution failed: ${error.message}`);
@@ -201,27 +231,66 @@ export const headsetRouter = router({
     diagnose: protectedProcedure
       .input(
         z.object({
-          prompt: z.string(),
-          provider: z.enum(["openai", "anthropic", "gemini"]).optional(),
+          apiKey: z.string(),
+          logs: z.array(z.string()),
+          deviceInfo: z.object({
+            manufacturer: z.string().optional(),
+            driver: z.string().optional(),
+            label: z.string().optional(),
+          }).optional(),
+          errorContext: z.string().optional(),
         })
       )
       .mutation(async ({ ctx, input }) => {
-        // Get API key from localStorage (passed from frontend)
-        // In a real implementation, you would call the AI API here
-        // For now, we'll create a placeholder response
+        try {
+          const analysis = await analyzeLogsWithAI(input.apiKey, {
+            logs: input.logs,
+            deviceInfo: input.deviceInfo,
+            errorContext: input.errorContext,
+          });
 
-        const response = "Diagnóstico de IA não implementado. Configure sua API Key nas configurações.";
+          const response = `**Diagnóstico:** ${analysis.diagnosis}\n\n**Ações Sugeridas:**\n${analysis.suggestedActions.map((a, i) => `${i + 1}. ${a}`).join("\n")}\n\n**Severidade:** ${analysis.severity} | **Confiança:** ${analysis.confidence}%`;
 
-        await createAIDiagnostic({
-          userId: ctx.user.id,
-          prompt: input.prompt,
-          response,
-          provider: input.provider || "openai",
-          model: "gpt-4o",
-          tokensUsed: 0,
-        });
+          await createAIDiagnostic({
+            userId: ctx.user.id,
+            prompt: `Análise de ${input.logs.length} logs`,
+            response,
+            provider: "openai",
+            model: "gpt-4o-mini",
+            tokensUsed: 0,
+          });
 
-        return { response };
+          // Emit AI diagnostic via WebSocket
+          emitAIDiagnostic({
+            userId: ctx.user.id,
+            response,
+            severity: analysis.severity,
+            confidence: analysis.confidence,
+          });
+
+          return { 
+            response,
+            analysis,
+          };
+        } catch (error: any) {
+          throw new Error(`Erro na análise de IA: ${error.message}`);
+        }
+      }),
+
+    suggest: protectedProcedure
+      .input(
+        z.object({
+          apiKey: z.string(),
+          symptoms: z.string(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const suggestions = await suggestTroubleshooting(input.apiKey, input.symptoms);
+          return { suggestions };
+        } catch (error: any) {
+          throw new Error(`Erro ao gerar sugestões: ${error.message}`);
+        }
       }),
 
     list: protectedProcedure

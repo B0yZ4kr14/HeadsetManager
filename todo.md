@@ -28,3 +28,11 @@
 - [ ] Exportação de relatórios de diagnóstico em PDF
 - [ ] Dashboard de métricas de qualidade de áudio
 - [ ] Notificações push para alertas de driver
+
+## Novas Tarefas Solicitadas 🚀
+
+- [x] Integração com API da OpenAI para análise inteligente de logs
+- [x] WebSockets para logs em tempo real e execução de scripts
+- [x] Interface de chat com IA no Dashboard (AIAssistant)
+- [x] Painel de logs ao vivo com WebSocket (LiveLogsPanel)
+- [x] 8 testes unitários passando (incluindo testes de IA)

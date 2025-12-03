@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useSocketEvent } from "@/hooks/useSocket";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -62,6 +63,25 @@ export default function DiagnosticsPage() {
       setExecutingScriptId(null);
     },
   });
+
+  // Listen for real-time script execution updates via WebSocket
+  const handleScriptExecution = useCallback(
+    (data: any) => {
+      if (data.status === "success") {
+        toast.success(`${data.scriptName} concluído!`, {
+          description: `Tempo: ${data.executionTime}ms`,
+        });
+      } else if (data.status === "failed") {
+        toast.error(`${data.scriptName} falhou`, {
+          description: data.errorMessage,
+        });
+      }
+      refetchExecutions();
+    },
+    [refetchExecutions]
+  );
+
+  useSocketEvent("script:execution", handleScriptExecution);
 
   const handleExecuteScript = (scriptId: number, requiresRoot: boolean) => {
     if (requiresRoot) {
