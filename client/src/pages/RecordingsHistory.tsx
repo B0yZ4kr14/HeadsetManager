@@ -2,9 +2,10 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileAudio, Calendar, Clock, TrendingUp, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { FileAudio, Calendar, Clock, TrendingUp, AlertCircle, CheckCircle, Info, RefreshCw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RecordingsHistory() {
   const { data: recordings, isLoading, refetch } = trpc.headset.tests.list.useQuery({ limit: 50 });
@@ -54,14 +55,38 @@ export default function RecordingsHistory() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Histórico de Gravações</h1>
           <p className="text-muted-foreground">Consulte todas as gravações e testes realizados para manutenção preventiva.</p>
         </div>
-        <Button onClick={() => refetch()} variant="outline">
+        <Button onClick={() => refetch()} variant="outline" disabled={isLoading}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           Atualizar
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">
-          Carregando histórico...
+        <div className="grid grid-cols-1 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="border-white/10 bg-card/50 backdrop-blur-md">
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-6 w-20" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-28" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       ) : !recordings || recordings.length === 0 ? (
         <Card className="border-white/10 bg-card/50 backdrop-blur-md">
