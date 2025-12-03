@@ -8,12 +8,14 @@ import Home from "./pages/Home";
 import TerminalPage from "./pages/Terminal";
 import DocsPage from "./pages/Docs";
 import SettingsPage from "./pages/Settings";
+import RecordingsPage from "./pages/Recordings";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/terminal" component={TerminalPage} />
+      <Route path="/recordings" component={RecordingsPage} />
       <Route path="/docs" component={DocsPage} />
       <Route path="/settings" component={SettingsPage} />
       <Route component={NotFound} />
