@@ -145,3 +145,23 @@
 - [x] Criar instalador .bin para Linux (scripts/build-linux.sh)
 - [x] Documentar processo de instalação (README.md)
 - [x] Scripts de build adicionados ao package.json (build:windows, build:linux, build:installers)
+
+## Novas Funcionalidades Solicitadas 🚀
+
+### FAQ (Perguntas Frequentes)
+- [x] Criar página de FAQ na documentação (Docs.tsx refatorado)
+- [x] Adicionar seção de instalação e uso inicial (Quick Start + Install tabs)
+- [x] Incluir troubleshooting comum (6 FAQs + dicas)
+- [x] Adicionar perguntas sobre configuração de IA (AI setup + cost)
+
+### Sistema de Notificações
+- [x] Implementar verificação de atualizações de software (systemRouter.checkForUpdates)
+- [x] Criar endpoint backend para versão atual (systemRouter.getVersion)
+- [x] Exibir notificação no frontend quando houver atualização (UpdateNotification component)
+- [x] Adicionar link para download da nova versão (GitHub releases + assets)
+
+### Exportação de Logs
+- [x] Criar botão "Exportar Logs" no Terminal (LiveLogsPanel)
+- [x] Implementar função de download de arquivo .txt (Blob + download)
+- [x] Incluir timestamp e formatação adequada (header + separadores)
+- [x] Nome do arquivo com data (headset-manager-logs-YYYY-MM-DD.txt)

@@ -4,6 +4,7 @@ import { Headphones, Terminal, FileText, Settings, Menu, X, HelpCircle, Wrench, 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import BrandLogo from "@/components/BrandLogo";
+import { UpdateNotification } from "@/components/UpdateNotification";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -91,6 +92,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
+
+      {/* Update Notification */}
+      <UpdateNotification />
     </div>
   );
 }

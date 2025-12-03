@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Trash2, Pause, Play, Activity } from "lucide-react";
+import { Trash2, Pause, Play, Activity, Download } from "lucide-react";
 import { useSocketEvent } from "@/hooks/useSocket";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +51,41 @@ export function LiveLogsPanel() {
   const clearLogs = () => setLogs([]);
   const togglePause = () => setIsPaused(!isPaused);
 
+  const exportLogs = () => {
+    if (logs.length === 0) {
+      return;
+    }
+
+    // Format logs as text
+    const logText = logs
+      .map((log) => {
+        const timestamp = log.timestamp.toLocaleString("pt-BR");
+        const header = `[${timestamp}] [${log.level.toUpperCase()}] [${log.source}]`;
+        const message = log.message;
+        const details = log.details ? `\nDetalhes: ${JSON.stringify(log.details, null, 2)}` : "";
+        return `${header}\n${message}${details}`;
+      })
+      .join("\n\n" + "=".repeat(80) + "\n\n");
+
+    // Add header
+    const header = `Headset Manager - Exportação de Logs\nData: ${new Date().toLocaleString("pt-BR")}\nTotal de logs: ${logs.length}\n${
+      "=".repeat(80)
+    }\n\n`;
+
+    const fullText = header + logText;
+
+    // Create blob and download
+    const blob = new Blob([fullText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `headset-manager-logs-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Card className="border-white/10 bg-card/50 backdrop-blur-md h-full flex flex-col">
       <CardHeader className="flex-none">
@@ -71,6 +106,16 @@ export function LiveLogsPanel() {
               title={isPaused ? "Retomar" : "Pausar"}
             >
               {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={exportLogs}
+              title="Exportar logs"
+              disabled={logs.length === 0}
+            >
+              <Download className="h-3 w-3" />
             </Button>
             <Button
               variant="ghost"
