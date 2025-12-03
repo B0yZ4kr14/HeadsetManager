@@ -121,3 +121,42 @@
 - [x] Script build-windows.js (.msi)
 - [x] Script build-linux.sh (.bin)
 - [x] Comandos npm: build:windows, build:linux, build:installers
+
+
+## Nova Refatoração Profissional 🚀
+
+### Logo Profissional
+- [ ] Gerar logo customizada "tSitelecom" sem fundo branco usando IA
+- [ ] Substituir logo atual pela nova versão
+- [ ] Validar em diferentes resoluções
+
+### Pesquisa de Melhores Práticas
+- [ ] Pesquisar tendências UI/UX 2025
+- [ ] Estudar padrões de acessibilidade WCAG
+- [ ] Analisar layouts modernos de dashboards
+- [ ] Documentar findings
+
+### Implementação Front-end
+- [ ] Aplicar melhores práticas encontradas
+- [ ] Otimizar responsividade mobile
+- [ ] Melhorar micro-interações e animações
+- [ ] Adicionar estados de loading mais elegantes
+- [ ] Implementar skeleton screens
+
+### Wiki GitHub
+- [ ] Criar estrutura de wiki no repositório
+- [ ] Página inicial (Home) com overview
+- [ ] Guia de instalação detalhado
+- [ ] Documentação de todas as funcionalidades
+- [ ] Tutoriais passo a passo com screenshots
+- [ ] FAQ completo
+- [ ] Troubleshooting guide
+- [ ] API documentation
+
+### Documentação para Leigos
+- [ ] Reescrever README em linguagem simples
+- [ ] Remover jargões técnicos
+- [ ] Adicionar glossário de termos
+- [ ] Criar guias visuais com imagens
+- [ ] Adicionar vídeos tutoriais (links)
+- [ ] Simplificar instruções de instalação
