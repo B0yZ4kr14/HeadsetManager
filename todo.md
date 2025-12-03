@@ -221,3 +221,13 @@
 - [x] Adicionar botão de filtro aos cards de status para exibir apenas headsets online ou offline
 - [x] Implementar efeito hover nos medidores circulares com informações detalhadas sobre métricas
 - [x] Adicionar tooltips informativos nos medidores (nível de áudio, qualidade, etc.)
+
+## Modo Fullscreen para Analisador de Espectro 🖥️
+
+- [x] Implementar estado de fullscreen no componente Home
+- [x] Adicionar botão de expansão no card do analisador de espectro
+- [x] Criar interface fullscreen otimizada com espectro maior
+- [x] Adicionar suporte à tecla ESC para sair do fullscreen
+- [x] Implementar transições suaves ao entrar/sair do modo fullscreen
+- [x] Manter controles de gravação acessíveis em fullscreen
+- [x] Adicionar overlay escuro ao fundo quando em fullscreen

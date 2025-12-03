@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Mic, Play, Square, Volume2, RefreshCw, AlertCircle, Save, Activity } from "lucide-react";
+import { Mic, Play, Square, Volume2, RefreshCw, AlertCircle, Save, Activity, Maximize, Minimize } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CircularMeter } from "@/components/CircularMeter";
 import { SpectrumChart } from "@/components/SpectrumChart";
@@ -35,6 +35,7 @@ export default function Home() {
   const [audioLevel, setAudioLevel] = useState(0);
   const [noiseLevel, setNoiseLevel] = useState(0);
   const [statusFilter, setStatusFilter] = useState<'all' | 'online' | 'offline'>('all');
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -333,6 +334,18 @@ export default function Home() {
     };
   }, [cleanupAudioResources]);
 
+  // ESC key listener for fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
+
   // Format time
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -342,6 +355,140 @@ export default function Home() {
 
   return (
     <TooltipProvider>
+      {/* Fullscreen Spectrum Analyzer */}
+      {isFullscreen && (
+        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+          <div className="flex items-center justify-between p-6 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Activity className="h-6 w-6 neon-blue" />
+              <h2 className="text-2xl font-bold neon-blue">Análise de Espectro - Modo Tela Cheia</h2>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">Pressione ESC para sair</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsFullscreen(false)}
+                    className="border-neon-blue"
+                  >
+                    <Minimize className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Sair do modo tela cheia</TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center p-8">
+            {isRecording ? (
+              <div className="w-full h-full max-h-[calc(100vh-200px)]">
+                <SpectrumChart data={spectrumData} height={window.innerHeight - 200} />
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <Mic className="h-32 w-32 mx-auto mb-6 opacity-30" />
+                <p className="text-xl">Inicie um teste para visualizar o espectro</p>
+              </div>
+            )}
+          </div>
+
+          {/* Fullscreen Controls */}
+          <div className="p-6 border-t border-border bg-background/50">
+            <div className="max-w-4xl mx-auto flex flex-wrap gap-4 justify-center">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    disabled={!selectedDeviceId || permissionDenied}
+                    className={cn(
+                      "min-w-[160px]",
+                      isRecording
+                        ? "bg-destructive hover:bg-destructive/90"
+                        : "bg-primary hover:bg-primary/90"
+                    )}
+                    size="lg"
+                  >
+                    {isRecording ? (
+                      <>
+                        <Square className="mr-2 h-5 w-5" />
+                        Parar ({formatTime(recordingTime)})
+                      </>
+                    ) : (
+                      <>
+                        <Mic className="mr-2 h-5 w-5" />
+                        Iniciar Gravação
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isRecording ? "Parar gravação" : "Iniciar gravação de áudio"}
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    onClick={isNoiseTestActive ? stopNoiseTest : startNoiseTest}
+                    disabled={!selectedDeviceId || permissionDenied || isRecording}
+                    variant="outline"
+                    size="lg"
+                    className={cn(
+                      "min-w-[160px]",
+                      isNoiseTestActive && "border-neon-orange"
+                    )}
+                  >
+                    <Volume2 className="mr-2 h-5 w-5" />
+                    {isNoiseTestActive ? "Parar Ruído" : "Teste de Ruído"}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Reproduzir ruído branco para teste de qualidade
+                </TooltipContent>
+              </Tooltip>
+
+              {audioUrl && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={playRecording}
+                        disabled={isPlaying}
+                        variant="outline"
+                        size="lg"
+                        className="min-w-[140px] border-neon-green"
+                      >
+                        <Play className="mr-2 h-5 w-5" />
+                        Reproduzir
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Reproduzir gravação</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={saveRecording}
+                        variant="outline"
+                        size="lg"
+                        className="min-w-[140px] border-neon-blue"
+                      >
+                        <Save className="mr-2 h-5 w-5" />
+                        Salvar
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Salvar gravação localmente</TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container py-8 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -386,9 +533,25 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Spectrum Analyzer - Large */}
           <Card className="neon-card-blue lg:col-span-2 lg:row-span-2 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Activity className="h-5 w-5 neon-blue" />
-              <h2 className="text-xl font-bold neon-blue">Análise de Espectro</h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 neon-blue" />
+                <h2 className="text-xl font-bold neon-blue">Análise de Espectro</h2>
+              </div>
+              
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsFullscreen(true)}
+                    className="hover:bg-primary/10"
+                  >
+                    <Maximize className="h-4 w-4 neon-blue" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Expandir para tela cheia</TooltipContent>
+              </Tooltip>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
               Visualização de frequência em tempo real
